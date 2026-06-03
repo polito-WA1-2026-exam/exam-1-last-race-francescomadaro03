@@ -22,9 +22,12 @@
 
 ## Database Tables
 
-- Table `users` - contains xx yy zz
-- Table `something` - contains ww qq ss
-- ...
+- Table `users` - contains users, with their ids, passwords.
+- Table `games` - contains games played by users.
+- Table `stations` - contains station names and their ids, to be better identified in the segment construction.
+- Table `lines` - contains lines that are derived from lists of station ids
+- Table `station_line` - contains correspondence between stations and lines, with their stop order to provide better segment checks
+- Table `events` - contains events that are randomically picked to add/subtract user coins
 
 ## Main React Components
 
