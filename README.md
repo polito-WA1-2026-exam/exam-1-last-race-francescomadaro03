@@ -9,12 +9,12 @@
 
 ## API Server
 
-- POST `/api/something`
-  - request parameters and request body content
-  - response body content
-- GET `/api/something`
-  - request parameters
-  - response body content
+- GET `/api/network`
+  - request parameters: session id for authentication
+  - response: list of lines and stations, ordered by their position in the line
+- GET `/api/scores`
+  - request parameters: session id
+  - response body content: all best scores from users in the database
 - POST `/api/something`
   - request parameters and request body content
   - response body content
