@@ -122,6 +122,13 @@ app.post("/api/games/setup", checkLoggedIn, async (req, res) => {
     }
     
     const route = generateRoute(globalGraph);
+
+    // SALVIAMO LE STAZIONI ASSEGNATE NELLA SESSIONE (Server-side)
+    req.session.assignedRoute = {
+      startId: route.start.id,
+      endId: route.end.id
+    };
+
     return res.json(route);
   } catch (err) {
     console.error(err);
@@ -132,7 +139,20 @@ app.post("/api/games/setup", checkLoggedIn, async (req, res) => {
 // Endpoint per validare il percorso inviato dal client ed eseguire gli eventi
 app.post("/api/games/validate", checkLoggedIn, async (req, res) => {
   try {
-    const { segments, startId, endId } = req.body;
+    const { segments } = req.body;
+
+    // Recuperiamo partenza e arrivo DALLA SESSIONE, non dal body!
+    const assignedRoute = req.session.assignedRoute;
+
+    if (!assignedRoute) {
+      return res.status(400).json({ 
+        isValid: false, 
+        error: "Nessun percorso assegnato trovato in sessione. Inizia prima una partita.",
+        finalScore: 0 
+      });
+    }
+
+    const { startId, endId } = assignedRoute;
 
     if (!globalGraph) {
       const network = await getNetwork();
@@ -140,6 +160,9 @@ app.post("/api/games/validate", checkLoggedIn, async (req, res) => {
     }
 
     const validationResult = validateSubmittedRoute(globalGraph, segments, startId, endId);
+
+    // Resettiamo la partita in sessione, sia in caso di vittoria che di sconfitta
+    req.session.assignedRoute = null;
 
     if (!validationResult.isValid) {
       // Se il percorso è invalido, il giocatore perde le sue 20 monete e il gioco finisce con score = 0

@@ -1,122 +1,98 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect, createContext } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import './App.css';
+
+// 1. Creiamo e esportiamo il contesto per l'utente loggato
+export const UserContext = createContext();
+
+// --- PLACEHOLDER DEI COMPONENTI (Li sposteremo in file separati) ---
+
+const Home = () => {
+  return (
+    <div>
+      <h2>Home / Login</h2>
+      <p>Qui metteremo le istruzioni del gioco e il form di login se l'utente non è autenticato.</p>
+    </div>
+  );
+};
+
+const Play = () => {
+  return (
+    <div>
+      <h2>Game Zone</h2>
+      <p>Qui ci sarà la logica a stati (LOADING, MEMORIZING, PLAYING, RESULTS).</p>
+    </div>
+  );
+};
+
+const Leaderboard = () => {
+  return (
+    <div>
+      <h2>Classifica (Best Scores)</h2>
+      <p>Qui la tabella con i punteggi migliori.</p>
+    </div>
+  );
+};
+
+const NotFound = () => {
+  return (
+    <div>
+      <h2>404 - Pagina non trovata</h2>
+      <Link to="/">Torna alla Home</Link>
+    </div>
+  );
+};
+
+// --- APP PRINCIPALE ---
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Al mount dell'app, controlliamo se c'è una sessione attiva chiamando l'API
+  useEffect(() => {
+    // Qui andrà la chiamata fetch a GET /api/sessions/current
+    // Per ora togliamo solo il loading
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return <div>Caricamento configurazione in corso...</div>;
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <UserContext.Provider value={{ user, setUser }}>
+      <BrowserRouter>
+        {/* Un Header basico condiviso in tutte le pagine */}
+        <header style={{ padding: '1rem', backgroundColor: '#f0f0f0', marginBottom: '1rem' }}>
+          <h1>London Underground Race</h1>
+          <nav style={{ display: 'flex', gap: '1rem' }}>
+            <Link to="/">Home</Link>
+            {user && <Link to="/play">Gioca</Link>}
+            {user && <Link to="/leaderboard">Classifica</Link>}
+            
+            <div style={{ marginLeft: 'auto' }}>
+              {user ? (
+                <span>Benvenuto, {user.username}! <button onClick={() => setUser(null)}>Logout</button></span>
+              ) : (
+                <span>Ospite</span>
+              )}
+            </div>
+          </nav>
+        </header>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {/* Il main accoglie le rotte */}
+        <main style={{ padding: '0 1rem' }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/play" element={<Play />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+      </BrowserRouter>
+    </UserContext.Provider>
+  );
 }
 
-export default App
+export default App;
