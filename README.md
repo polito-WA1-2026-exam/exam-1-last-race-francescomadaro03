@@ -9,16 +9,34 @@
 
 ## API Server
 
+- POST `/api/sessions`
+  - request parameters: none
+  - request body content: JSON object with `username` and `password`
+  - response body content: JSON object containing the authenticated `user` info (e.g., `{ id, username }`)
+- GET `/api/sessions/current`
+  - request parameters: none (uses session cookie)
+  - response body content: JSON object of the currently authenticated `user`
+- DELETE `/api/sessions/current`
+  - request parameters: none
+  - response body content: empty body (terminates the session)
 - GET `/api/network`
-  - request parameters: session id for authentication
-  - response: list of lines and stations, ordered by their position in the line
-- GET `/api/scores`
-  - request parameters: session id
-  - response body content: all best scores from users in the database
-- POST `/api/something`
-  - request parameters and request body content
-  - response body content
-- ...
+  - request parameters: none (requires authentication)
+  - response body content: JSON array containing the list of all lines, stations, and their connections ordered by line and stop order.
+- GET `/api/events`
+  - request parameters: none (requires authentication)
+  - response body content: JSON array of all possible random events, each with their `event_id`, `event_name`, `bonus`, and `weight`.
+- GET `/api/games`
+  - request parameters: none (requires authentication)
+  - response body content: JSON array representing the leaderboard, containing the best `score` achieved by each `username`.
+- POST `/api/games/setup`
+  - request parameters: none (requires authentication)
+  - request body content: none
+  - response body content: JSON object containing a randomly generated valid route assignment, including `start` station, `end` station, and the `minDistance` (which is guaranteed to be >= 3).
+- POST `/api/games/validate`
+  - request parameters: none (requires authentication)
+  - request body content: JSON object with `startId`, `endId`, and an array of `segments`, e.g., `{ "startId": 14, "endId": 7, "segments": [ { "startId": 14, "endId": 6 }, { "startId": 6, "endId": 7 } ] }`
+  - response body content: JSON object containing the game result. If invalid, `{ "isValid": false, "error": "...", "finalScore": 0 }`. If valid, returns `{ "isValid": true, "events": [{ "step": 1, "segment": "Green Park -> Oxford Circus", "message": "Mind the gap!", "scoreChange": -1 }], "finalScore": 19 }`
+
 
 ## Database Tables
 

@@ -1,0 +1,63 @@
+### Login
+# The first step is to log in, to receive the session cookie.
+# All subsequent requests will automatically use this cookie if your HTTP client supports it.
+POST http://localhost:3001/api/sessions
+Content-Type: application/json
+
+{
+    "username": "john_doe",
+    "password": "password123"
+}
+
+###
+
+### Get Current User
+# Checks if the user is currently authenticated and returns their info
+GET http://localhost:3001/api/sessions/current
+
+###
+
+### Get Network Data (Requires Auth)
+# Fetches all stations, lines, and their connections
+GET http://localhost:3001/api/network
+
+###
+
+### Get Events (Requires Auth)
+# Fetches the list of random events available during the game
+GET http://localhost:3001/api/events
+
+###
+
+### Get Best Scores (Requires Auth)
+# Fetches the leaderboard/best scores from all games
+GET http://localhost:3001/api/games
+
+###
+
+### Setup New Game Route (Requires Auth)
+# Generates a random start and destination station with minimum distance >= 3
+POST http://localhost:3001/api/games/setup
+
+###
+
+### Validate Route & Play (Requires Auth)
+# Submits a sequence of segments to validate them and fetch random events/score.
+# Esempio: Green Park (14) -> Oxford Circus (6) -> Tottenham Court Road (7)
+POST http://localhost:3001/api/games/validate
+Content-Type: application/json
+
+{
+    "startId": 14,
+    "endId": 7,
+    "segments": [
+        { "startId": 14, "endId": 6 },
+        { "startId": 6, "endId": 7 }
+    ]
+}
+
+###
+
+### Logout
+# Terminates the session
+DELETE http://localhost:3001/api/sessions/current
