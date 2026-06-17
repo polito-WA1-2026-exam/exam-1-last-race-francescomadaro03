@@ -1,6 +1,5 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
-import TransitMap from './components/TransitMap';
 import Login from './components/Login';
 import UserProfile from './components/UserProfile';
 import Header from './components/Header';

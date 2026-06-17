@@ -81,3 +81,18 @@ export const validateGame = async (segments, startTimestamp, endTimestamp) => {
     throw error;
   }
 };
+
+export const logOut = async () => {
+  try {
+    const response = await fetch(`${APIURL}/sessions/current`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    if (!response.ok) {
+      throw new Error('Logout failed');
+    }
+  } catch (error) {
+    console.error('Error logging out', error);
+    throw error;
+  }
+};

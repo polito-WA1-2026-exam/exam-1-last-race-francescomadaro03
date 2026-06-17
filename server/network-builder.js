@@ -1,7 +1,9 @@
 class StationNode {
-    constructor(id, name) {
+    constructor(id, name, lat, lng) {
         this.id = Number(id);
         this.name = name;
+        this.lat = lat;
+        this.lng = lng;
         // Per ogni linea a cui appartiene, memorizziamo i puntatori al nodo precedente e successivo
         // map: line_id -> { prev: StationNode | null, next: StationNode | null, lineName: string }
         this.lines = new Map();
@@ -39,7 +41,7 @@ export const buildDoubleLinkedList = (networkEntries) => {
     // 1. Creiamo tutti i nodi vuoti e popoliamo i line_set
     networkEntries.forEach(entry => {
         if (!stations.has(entry.station_id)) {
-            stations.set(entry.station_id, new StationNode(entry.station_id, entry.station_name));
+            stations.set(entry.station_id, new StationNode(entry.station_id, entry.station_name, entry.lat, entry.lng));
         }
         const node = stations.get(entry.station_id);
 
@@ -187,8 +189,8 @@ export const generateRoute = (stations, linesMap) => {
     }
 
     return {
-        start: { id: startNode.id, name: startNode.name },
-        end: { id: endNode.id, name: endNode.name },
+        start: { id: startNode.id, name: startNode.name, lat: startNode.lat, lng: startNode.lng },
+        end: { id: endNode.id, name: endNode.name, lat: endNode.lat, lng: endNode.lng },
         minDistance: getShortestPath(stations, linesMap, startNode.id, endNode.id)
     };
 };

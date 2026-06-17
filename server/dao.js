@@ -15,7 +15,7 @@ const db = new sqlite3.Database(dbFile, (err) => {
 
 export const getNetwork = () => {
     const sql = `
-    SELECT l.line_id, l.line_name, l.color, s.station_id, s.station_name, sl.stop_order
+    SELECT l.line_id, l.line_name, l.color, s.station_id, s.station_name, s.lat, s.lng, sl.stop_order
     FROM stations AS s
     JOIN station_line AS sl ON s.station_id = sl.station_id
     JOIN lines AS l ON l.line_id = sl.line_id

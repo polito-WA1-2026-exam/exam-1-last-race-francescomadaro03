@@ -1,13 +1,18 @@
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../App';
+import { logOut } from '../api';
 
 const Header = () => {
   const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // Aggiungere qui la chiamata API eventuale per invalidare la sessione
+  const handleLogout = async () => {
+    try {
+      await logOut();
+    } catch (err) {
+      console.error('Logout err', err);
+    }
     setUser(null);
     navigate('/');
   };

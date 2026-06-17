@@ -1,5 +1,6 @@
-import TransitMap from './TransitMap';
+import DystopicMap from './DystopicMap';
 import SegmentHandler from './SegmentHandler';
+import TimerComponent from './TimerComponent';
 import { getNetwork, setupGame, validateGame } from '../api';
 import { useState, useEffect } from 'react';
 
@@ -77,7 +78,7 @@ const Play = () => {
     <div className="container-fluid m-0 p-0 d-flex" style={{ height: 'calc(100vh - 80px)', minHeight: '600px' }}>
       {/* Sinistra: Mappa (70%) */}
       <div style={{ width: '70%', height: '100%', position: 'relative' }}>
-        <TransitMap fetchStations={getNetwork} showLines={showMapLines} />
+        <DystopicMap fetchStations={getNetwork} showLines={showMapLines} />
       </div>
 
       {/* Destra: Pannello di Gioco (30%) */}
@@ -126,12 +127,9 @@ const Play = () => {
           <div className="p-4 d-flex flex-column h-100">
             <div className="d-flex justify-content-between align-items-center mb-4">
               <h3 className="m-0">Pannello di Gioco</h3>
-              {isPlaying && (
-                <div className={`fs-4 fw-bold ${timeLeft <= 10 ? 'text-danger' : 'text-primary'}`}>
-                  ⏱ {timeLeft}s
-                </div>
-              )}
             </div>
+            
+            {isPlaying && <TimerComponent timeLeft={timeLeft} maxTime={90} />}
 
             <div className="flex-grow-1" style={{ minHeight: 0 }}>
               {isPlaying ? (

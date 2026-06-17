@@ -1,4 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@100..900&display=swap');
+
 :root {
+  --primary: #151E26;
+  --secondary: #344859;
+  --tertiary: #F2EDE4;
+  --quaternary: #F2A35E;
+  --quinary: #A64F3C;
+
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
@@ -11,8 +19,8 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Bitcount Prop Single', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --heading: 'Bitcount Prop Single', system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   font: 18px/145% var(--sans);
