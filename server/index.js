@@ -6,6 +6,7 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { getUser, getBestScores, getEvents, getNetwork, saveGame } from "./dao.js"
 import { User, Event, NetworkEntry, Game, } from "./models.js"
+import { buildDoubleLinkedList, generateRoute, validateSubmittedRoute, generateRandomEvents } from "./network-builder.js";
 
 
 // init express
@@ -88,7 +89,6 @@ app.delete("/api/sessions/current", (req, res) => {
   });
 });
 
-import { buildDoubleLinkedList, generateRoute, validateSubmittedRoute, generateRandomEvents } from "./network-builder.js";
 
 // Variabile globale per salvare la double-linked list
 let globalGraph = null;
@@ -99,11 +99,12 @@ app.get("/api/network", checkLoggedIn, async (req, res) => {
   try {
     // Il DAO prende i dati dal database
     const network = await getNetwork();
-    
+
     // Costruiamo e salviamo la double-linked list nella variabile globale
     // (lo facciamo solo la prima volta, o la ricreiamo ogni volta, per sicurezza la salviamo)
-    globalGraph = buildDoubleLinkedList(network);
-    
+    const { stations, linesMap } = buildDoubleLinkedList(network);
+    globalGraph = { stations, linesMap };
+
     // E li mandiamo al frontend come richiesto
     return res.json(network);
   } catch (err) {
@@ -118,10 +119,11 @@ app.post("/api/games/setup", checkLoggedIn, async (req, res) => {
     if (!globalGraph) {
       // Nel caso in cui il setup venga chiamato prima del network, lo carichiamo
       const network = await getNetwork();
-      globalGraph = buildDoubleLinkedList(network);
+      const { stations, linesMap } = buildDoubleLinkedList(network);
+      globalGraph = { stations, linesMap };
     }
-    
-    const route = generateRoute(globalGraph);
+
+    const route = generateRoute(globalGraph.stations, globalGraph.linesMap);
 
     // SALVIAMO LE STAZIONI ASSEGNATE NELLA SESSIONE (Server-side)
     req.session.assignedRoute = {
@@ -139,16 +141,30 @@ app.post("/api/games/setup", checkLoggedIn, async (req, res) => {
 // Endpoint per validare il percorso inviato dal client ed eseguire gli eventi
 app.post("/api/games/validate", checkLoggedIn, async (req, res) => {
   try {
-    const { segments } = req.body;
+    const { segments, startTimestamp, endTimestamp } = req.body;
+
+    // Controllo cheat: Il tempo impiegato non deve superare i 90 secondi (più 5 secondi di tolleranza latenza rete)
+    if (startTimestamp && endTimestamp) {
+      const elapsedMs = endTimestamp - startTimestamp;
+      if (elapsedMs > 95000) {
+        // Tempo scaduto, punteggio azzerato
+        await saveGame(req.user.username, 0);
+        return res.status(400).json({
+          isValid: false,
+          error: "Tempo scaduto! Hai impiegato più di 90 secondi.",
+          finalScore: 0
+        });
+      }
+    }
 
     // Recuperiamo partenza e arrivo DALLA SESSIONE, non dal body!
     const assignedRoute = req.session.assignedRoute;
 
     if (!assignedRoute) {
-      return res.status(400).json({ 
-        isValid: false, 
+      return res.status(400).json({
+        isValid: false,
         error: "Nessun percorso assegnato trovato in sessione. Inizia prima una partita.",
-        finalScore: 0 
+        finalScore: 0
       });
     }
 
@@ -156,10 +172,14 @@ app.post("/api/games/validate", checkLoggedIn, async (req, res) => {
 
     if (!globalGraph) {
       const network = await getNetwork();
-      globalGraph = buildDoubleLinkedList(network);
+      const { stations, linesMap } = buildDoubleLinkedList(network);
+      globalGraph = { stations, linesMap };
     }
 
-    const validationResult = validateSubmittedRoute(globalGraph, segments, startId, endId);
+    const validationResult = validateSubmittedRoute(globalGraph.stations, globalGraph.linesMap, segments, Number(startId), Number(endId));
+    console.log(segments);
+    console.log(validationResult);
+    console.log(validationResult.isValid);
 
     // Resettiamo la partita in sessione, sia in caso di vittoria che di sconfitta
     req.session.assignedRoute = null;
@@ -169,16 +189,16 @@ app.post("/api/games/validate", checkLoggedIn, async (req, res) => {
       // Dobbiamo anche salvare il punteggio di 0 nel database
       await saveGame(req.user.username, 0);
 
-      return res.status(400).json({ 
-        isValid: false, 
+      return res.status(400).json({
+        isValid: false,
         error: validationResult.error,
-        finalScore: 0 
+        finalScore: 0
       });
     }
 
     // Se la route è valida, prendiamo gli eventi dal DB
     const allEvents = await getEvents();
-    
+
     // Generiamo gli eventi casuali per ogni segmento (basato sul peso)
     const segmentEvents = generateRandomEvents(allEvents, segments.length);
 
@@ -188,13 +208,13 @@ app.post("/api/games/validate", checkLoggedIn, async (req, res) => {
     for (let i = 0; i < segments.length; i++) {
       const ev = segmentEvents[i];
       currentScore += ev.bonus;
-      
+
       // Assicuriamoci che il punteggio finale non sia negativo per via degli eventi sfortunati
       if (currentScore < 0) currentScore = 0;
 
       // Recuperiamo i nomi delle stazioni per rendere il messaggio più ricco
-      const startNode = globalGraph.get(segments[i].startId);
-      const endNode = globalGraph.get(segments[i].endId);
+      const startNode = globalGraph.stations.get(segments[i].startId);
+      const endNode = globalGraph.stations.get(segments[i].endId);
 
       executionSteps.push({
         step: i + 1,

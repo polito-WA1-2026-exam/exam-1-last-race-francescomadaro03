@@ -1,34 +1,14 @@
 class StationNode {
     constructor(id, name) {
-        this.id = Number(id);
+        this.id = id;
         this.name = name;
         // Per ogni linea a cui appartiene, memorizziamo i puntatori al nodo precedente e successivo
         // map: line_id -> { prev: StationNode | null, next: StationNode | null, lineName: string }
-        this.lines = new Map();
+        this.lines = {}; 
+        
         // Nuovi campi per gli interscambi
         this.exchange = false;
         this.line_set = new Set(); // Set di ID o nomi delle linee che passano per questa stazione
-
-    }
-}
-
-class Line {
-    constructor(id, name) {
-        this.id = id;
-        this.name = name;
-        this.stops = [];
-    }
-
-    getNextStop(stationId) {
-        const index = this.stops.findIndex(s => s.id === stationId);
-        if (index !== -1 && index < this.stops.length - 1) return this.stops[index + 1];
-        return null;
-    }
-
-    getPrevStop(stationId) {
-        const index = this.stops.findIndex(s => s.id === stationId);
-        if (index > 0) return this.stops[index - 1];
-        return null;
     }
 }
 
@@ -42,119 +22,121 @@ export const buildDoubleLinkedList = (networkEntries) => {
             stations.set(entry.station_id, new StationNode(entry.station_id, entry.station_name));
         }
         const node = stations.get(entry.station_id);
-
+        
         // Aggiungiamo l'ID della linea al Set delle linee
         node.line_set.add(entry.line_id);
-
+        
         // Se c'è più di una linea, allora è uno snodo di interscambio
         if (node.line_set.size > 1) {
             node.exchange = true;
         }
+
+        // Inizializziamo l'oggetto della linea per questa stazione
+        node.lines[entry.line_id] = { 
+            prev: null, 
+            next: null, 
+            lineName: entry.line_name,
+            stopOrder: entry.stop_order 
+        };
     });
 
     // 2. Raggruppiamo per linea e ordiniamo per stop_order
     const linesMap = {};
     networkEntries.forEach(entry => {
         if (!linesMap[entry.line_id]) {
-            linesMap[entry.line_id] = new Line(entry.line_id, entry.line_name);
+            linesMap[entry.line_id] = [];
         }
-        linesMap[entry.line_id].stops.push(entry);
+        linesMap[entry.line_id].push(entry);
     });
 
     // 3. Colleghiamo i nodi (Double-Linked List)
-    for (const stringLineId in linesMap) {
-        const lineId = Number(stringLineId);
-        const line = linesMap[lineId];
+    for (const lineId in linesMap) {
+        const stops = linesMap[lineId];
         // Assicuriamoci che siano ordinati per stop_order
-        line.stops.sort((a, b) => a.stop_order - b.stop_order);
-        line.stops = line.stops.map((stop) => stations.get(stop.station_id));
-        for (let i = 0; i < line.stops.length; i++) {
-            const currentNode = line.stops[i];
-            let prevNode = null;
-            let nextNode = null;
+        stops.sort((a, b) => a.stop_order - b.stop_order);
+
+        for (let i = 0; i < stops.length; i++) {
+            const currentId = stops[i].station_id;
+            const currentNode = stations.get(currentId);
+            
             // Colleghiamo il nodo precedente
             if (i > 0) {
-                prevNode = line.stops[i - 1];
+                const prevId = stops[i - 1].station_id;
+                currentNode.lines[lineId].prev = stations.get(prevId);
             }
             // Colleghiamo il nodo successivo
-            if (i < line.stops.length - 1) {
-                nextNode = line.stops[i + 1];
+            if (i < stops.length - 1) {
+                const nextId = stops[i + 1].station_id;
+                currentNode.lines[lineId].next = stations.get(nextId);
             }
-
-            currentNode.lines.set(lineId, { prev: prevNode, next: nextNode, lineName: line.name, stopOrder: i });
         }
     }
 
     // Ritorniamo la mappa con tutti i nodi interconnessi
-    return { stations, linesMap };
+    return stations;
 };
 
-export const getShortestPath = (stations, linesMap, startId, targetId) => {
+export const getShortestPath = (graph, startId, targetId) => {
     const queue = [{ id: startId, dist: 0 }];
     const visited = new Set();
     visited.add(startId);
 
-    while (queue.length > 0) {
+    while(queue.length > 0) {
         const curr = queue.shift();
         if (curr.id === targetId) return curr.dist;
 
-        const node = stations.get(curr.id);
-
+        const node = graph.get(curr.id);
+        
         // I vicini sono prev e next su ogni linea a cui il nodo appartiene
         for (const lineId of node.line_set) {
-            const line = linesMap[lineId];
-            if (line) {
-                const nextNode = line.getNextStop(node.id);
-                const prevNode = line.getPrevStop(node.id);
-
-                if (nextNode && !visited.has(nextNode.id)) {
-                    visited.add(nextNode.id);
-                    queue.push({ id: nextNode.id, dist: curr.dist + 1 });
-                }
-                if (prevNode && !visited.has(prevNode.id)) {
-                    visited.add(prevNode.id);
-                    queue.push({ id: prevNode.id, dist: curr.dist + 1 });
-                }
+            const lineData = node.lines[lineId];
+            if (lineData.next && !visited.has(lineData.next.id)) {
+                visited.add(lineData.next.id);
+                queue.push({ id: lineData.next.id, dist: curr.dist + 1 });
+            }
+            if (lineData.prev && !visited.has(lineData.prev.id)) {
+                visited.add(lineData.prev.id);
+                queue.push({ id: lineData.prev.id, dist: curr.dist + 1 });
             }
         }
     }
     return -1; // Se non raggiungibile
 };
 
-export const generateRoute = (stations, linesMap) => {
-    const stationIds = [...stations.keys()];
+export const generateRoute = (graph) => {
+    const stationIds = Array.from(graph.keys());
     let valid = false;
     let startNode, endNode;
 
     while (!valid) {
         // 1. Scegli partenza casuale
         const startId = stationIds[Math.floor(Math.random() * stationIds.length)];
-
-        let currentNode = stations.get(startId);
+        startNode = graph.get(startId);
+        
+        let currentNode = startNode;
         // Scegli linea iniziale a caso tra quelle del nodo
-        const initialLines = [...currentNode.line_set];
+        const initialLines = Array.from(currentNode.line_set);
         let currentLineId = initialLines[Math.floor(Math.random() * initialLines.length)];
-
+        
         // Parametri casuali
         let totalSteps = Math.floor(Math.random() * 5) + 4; // Da 4 a 8 passi (per sicurezza > 3)
         let interchangesLeft = Math.floor(Math.random() * 3) + 1; // 1, 2 o 3 interscambi
-
+        
         let explored = new Set();
-        explored.add(startId);
-
+        explored.add(currentNode.id);
+        
         // Direzione: 'next' o 'prev'
         let direction = Math.random() < 0.5 ? 'next' : 'prev';
         let aborted = false;
 
         while (totalSteps > 0 && !aborted) {
-            const lineData = currentNode.lines.get(currentLineId);
-            const nextNode = direction === 'next' ? lineData.next : lineData.prev;
-
+            const nextNode = currentNode.lines[currentLineId][direction];
+            
             if (!nextNode) {
                 // Raggiunto un capolinea
                 break;
             }
-
+            
             if (explored.has(nextNode.id)) {
                 aborted = true; // Loop individuato, abortiamo
                 break;
@@ -166,7 +148,7 @@ export const generateRoute = (stations, linesMap) => {
 
             // Se siamo su uno snodo e abbiamo ancora interscambi, cambiamo linea
             if (totalSteps > 0 && currentNode.exchange && interchangesLeft > 0) {
-                const otherLines = [...currentNode.line_set].filter(lid => lid !== currentLineId);
+                const otherLines = Array.from(currentNode.line_set).filter(lid => lid !== currentLineId);
                 if (otherLines.length > 0) {
                     currentLineId = otherLines[Math.floor(Math.random() * otherLines.length)];
                     interchangesLeft--;
@@ -176,29 +158,25 @@ export const generateRoute = (stations, linesMap) => {
         }
 
         // Se non abbiamo abortito per loop, controlliamo la distanza minima
-        if (!aborted && currentNode.id !== startId) {
+        if (!aborted && currentNode.id !== startNode.id) {
             endNode = currentNode;
-            const dist = getShortestPath(stations, linesMap, startId, endNode.id);
+            const dist = getShortestPath(graph, startNode.id, endNode.id);
             if (dist >= 3) {
-                startNode = stations.get(startId);
                 valid = true;
             }
         }
     }
-
+    
     return {
         start: { id: startNode.id, name: startNode.name },
         end: { id: endNode.id, name: endNode.name },
-        minDistance: getShortestPath(stations, linesMap, startNode.id, endNode.id)
+        minDistance: getShortestPath(graph, startNode.id, endNode.id)
     };
 };
 
-export const validateSubmittedRoute = (stations, linesMap, segments, rawAssignedStartId, rawAssignedEndId) => {
-    const assignedStartId = Number(rawAssignedStartId);
-    const assignedEndId = Number(rawAssignedEndId);
-
+export const validateSubmittedRoute = (graph, segments, assignedStartId, assignedEndId) => {
     // 1. Basic check: Do assigned stations exist?
-    if (!stations.has(assignedStartId) || !stations.has(assignedEndId)) {
+    if (!graph.has(assignedStartId) || !graph.has(assignedEndId)) {
         return { isValid: false, error: "Assigned stations do not exist in the network." };
     }
 
@@ -209,12 +187,9 @@ export const validateSubmittedRoute = (stations, linesMap, segments, rawAssigned
     let isForward = true;
 
     // 2. Start and End checks
-    const firstSegStart = Number(segments[0].startId);
-    const lastSegEnd = Number(segments[segments.length - 1].endId);
-
-    if (firstSegStart === assignedStartId && lastSegEnd === assignedEndId) {
+    if (segments[0].startId === assignedStartId && segments[segments.length - 1].endId === assignedEndId) {
         isForward = true;
-    } else if (firstSegStart === assignedEndId && lastSegEnd === assignedStartId) {
+    } else if (segments[0].startId === assignedEndId && segments[segments.length - 1].endId === assignedStartId) {
         isForward = false;
     } else {
         return { isValid: false, error: "The route does not start and end at the assigned stations." };
@@ -224,34 +199,32 @@ export const validateSubmittedRoute = (stations, linesMap, segments, rawAssigned
     let currentStationId = isForward ? assignedStartId : assignedEndId;
 
     for (let i = 0; i < segments.length; i++) {
-        const segStartId = Number(segments[i].startId);
-        const segEndId = Number(segments[i].endId);
-
+        const seg = segments[i];
+        
         // 3. Continuity check
-        if (segStartId !== currentStationId) {
-            return { isValid: false, error: `Route discontinuity at segment ${i + 1}: expected to start from station ${currentStationId}.` };
+        if (seg.startId !== currentStationId) {
+            return { isValid: false, error: `Route discontinuity at segment ${i+1}: expected to start from station ${currentStationId}.` };
         }
 
-        const currentNode = stations.get(segStartId);
-        const nextNode = stations.get(segEndId);
+        const currentNode = graph.get(seg.startId);
+        const nextNode = graph.get(seg.endId);
 
         if (!currentNode || !nextNode) {
-            return { isValid: false, error: `Invalid station ID at segment ${i + 1}.` };
+            return { isValid: false, error: `Invalid station ID at segment ${i+1}.` };
         }
 
         // 4. Double-Linked List adjacency check
         let validAdjacency = false;
-
+        
         // Search through all lines passing through the current node
         const linesToCheck = Array.from(currentNode.line_set);
 
         for (const lineId of linesToCheck) {
-            const line = linesMap[lineId];
-            if (line) {
-                const prevNode = line.getPrevStop(currentNode.id);
-                const nextNodeOnLine = line.getNextStop(currentNode.id);
-
-                if ((prevNode && prevNode.id === segEndId) || (nextNodeOnLine && nextNodeOnLine.id === segEndId)) {
+            if (currentNode.lines[lineId]) {
+                const prevNode = currentNode.lines[lineId].prev;
+                const nextNodeOnLine = currentNode.lines[lineId].next;
+                
+                if ((prevNode && prevNode.id === seg.endId) || (nextNodeOnLine && nextNodeOnLine.id === seg.endId)) {
                     validAdjacency = true;
                     break;
                 }
@@ -259,21 +232,21 @@ export const validateSubmittedRoute = (stations, linesMap, segments, rawAssigned
         }
 
         if (!validAdjacency) {
-            return { isValid: false, error: `Stations ${segStartId} and ${segEndId} are not adjacent.` };
+            return { isValid: false, error: `Stations ${seg.startId} and ${seg.endId} are not adjacent.` };
         }
 
         // 5. Duplicate segment check
-        const minId = Math.min(segStartId, segEndId);
-        const maxId = Math.max(segStartId, segEndId);
+        const minId = Math.min(seg.startId, seg.endId);
+        const maxId = Math.max(seg.startId, seg.endId);
         const sig = `${minId}-${maxId}`;
 
         if (usedSegments.has(sig)) {
-            return { isValid: false, error: `Duplicate segment: the path ${segStartId}-${segEndId} has been traversed more than once.` };
+            return { isValid: false, error: `Duplicate segment: the path ${seg.startId}-${seg.endId} has been traversed more than once.` };
         }
         usedSegments.add(sig);
 
         // Move to the next node
-        currentStationId = segEndId;
+        currentStationId = seg.endId;
     }
 
     return { isValid: true, error: null };
@@ -287,7 +260,7 @@ export const validateSubmittedRoute = (stations, linesMap, segments, rawAssigned
  */
 export const generateRandomEvents = (eventsList, numSegments) => {
     if (!eventsList || eventsList.length === 0) return [];
-
+    
     // Calculate total weight of all events
     const totalWeight = eventsList.reduce((sum, event) => sum + event.weight, 0);
     const selectedEvents = [];
@@ -295,7 +268,7 @@ export const generateRandomEvents = (eventsList, numSegments) => {
     for (let i = 0; i < numSegments; i++) {
         // Pick a random number between 0 (inclusive) and totalWeight (exclusive)
         let randomValue = Math.floor(Math.random() * totalWeight);
-
+        
         // Find the event corresponding to the random value
         for (const event of eventsList) {
             randomValue -= event.weight;

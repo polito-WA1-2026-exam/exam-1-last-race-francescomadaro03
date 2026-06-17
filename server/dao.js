@@ -67,7 +67,7 @@ export const getEvents = () => {
 
 // Save a new game score
 export const saveGame = (username, score) => {
-    const sql = "INSERT INTO games VALUES (username, score)";
+    const sql = "INSERT INTO games (username, score) VALUES (?, ?)";
     return new Promise((resolve, reject) => {
         db.run(sql, [username, score], function (err) {
             if (err) {

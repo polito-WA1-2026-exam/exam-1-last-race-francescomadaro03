@@ -1,47 +1,21 @@
-import { useState, useEffect, createContext } from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { useState, useEffect, createContext, useContext } from 'react';
+import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import TransitMap from './components/TransitMap';
+import Login from './components/Login';
+import UserProfile from './components/UserProfile';
+import Header from './components/Header';
+import Home from './components/Home';
+import Play from './components/Play';
+import NotFound from './components/NotFound';
+import ProtectedRoute from './components/ProtectedRoute';
+import { getNetwork } from './api';
 import './App.css';
 
 // 1. Creiamo e esportiamo il contesto per l'utente loggato
 export const UserContext = createContext();
 
-// --- PLACEHOLDER DEI COMPONENTI (Li sposteremo in file separati) ---
-
-const Home = () => {
-  return (
-    <div>
-      <h2>Home / Login</h2>
-      <p>Qui metteremo le istruzioni del gioco e il form di login se l'utente non è autenticato.</p>
-    </div>
-  );
-};
-
-const Play = () => {
-  return (
-    <div>
-      <h2>Game Zone</h2>
-      <p>Qui ci sarà la logica a stati (LOADING, MEMORIZING, PLAYING, RESULTS).</p>
-    </div>
-  );
-};
-
-const Leaderboard = () => {
-  return (
-    <div>
-      <h2>Classifica (Best Scores)</h2>
-      <p>Qui la tabella con i punteggi migliori.</p>
-    </div>
-  );
-};
-
-const NotFound = () => {
-  return (
-    <div>
-      <h2>404 - Pagina non trovata</h2>
-      <Link to="/">Torna alla Home</Link>
-    </div>
-  );
-};
+// --- COMPONENTI INTERNI ---
+// Rimosse le definizioni inline (Header, Home, Play, NotFound) ora in file separati.
 
 // --- APP PRINCIPALE ---
 
@@ -63,33 +37,23 @@ function App() {
   return (
     <UserContext.Provider value={{ user, setUser }}>
       <BrowserRouter>
-        {/* Un Header basico condiviso in tutte le pagine */}
-        <header style={{ padding: '1rem', backgroundColor: '#f0f0f0', marginBottom: '1rem' }}>
-          <h1>London Underground Race</h1>
-          <nav style={{ display: 'flex', gap: '1rem' }}>
-            <Link to="/">Home</Link>
-            {user && <Link to="/play">Gioca</Link>}
-            {user && <Link to="/leaderboard">Classifica</Link>}
-            
-            <div style={{ marginLeft: 'auto' }}>
-              {user ? (
-                <span>Benvenuto, {user.username}! <button onClick={() => setUser(null)}>Logout</button></span>
-              ) : (
-                <span>Ospite</span>
-              )}
-            </div>
-          </nav>
-        </header>
-
-        {/* Il main accoglie le rotte */}
-        <main style={{ padding: '0 1rem' }}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/play" element={<Play />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
+        <Header />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/user/:username" element={
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          } />
+          <Route path="/play" element={
+            <ProtectedRoute>
+              <Play />
+            </ProtectedRoute>
+          } />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </BrowserRouter>
     </UserContext.Provider>
   );
