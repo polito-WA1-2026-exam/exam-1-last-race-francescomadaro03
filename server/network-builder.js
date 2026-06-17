@@ -1,3 +1,5 @@
+import { start } from "node:repl";
+
 class StationNode {
     constructor(id, name, lat, lng) {
         this.id = Number(id);
@@ -199,80 +201,73 @@ export const validateSubmittedRoute = (stations, linesMap, segments, rawAssigned
     const assignedStartId = Number(rawAssignedStartId);
     const assignedEndId = Number(rawAssignedEndId);
 
+    // 1. Le stazioni assegnate esistono?
     if (!stations.has(assignedStartId) || !stations.has(assignedEndId)) {
         return { isValid: false, error: "Assigned stations do not exist in the network." };
     }
+
+    // 2. È stato fornito un percorso?
     if (!segments || segments.length === 0) {
         return { isValid: false, error: "No route provided." };
     }
 
-    // 3. Determina il verso del percorso
-    //    Un segmento è bidirezionale: {startId, endId} può essere percorso in entrambe le direzioni.
-    //    Ci interessa solo sapere da quale stazione si parte e a quale si arriva.
-    const endpointsOfFirstSeg = [Number(segments[0].startId), Number(segments[0].endId)];
-    const endpointsOfLastSeg = [Number(segments[segments.length - 1].startId), Number(segments[segments.length - 1].endId)];
+    const remainingSegments = [...segments];
 
-    let currentStation;
-    let targetStation;
+    // 3. Trova il segmento di partenza e rimuovilo
+    const startSegIndex = remainingSegments.findIndex(
+        seg => Number(seg.startId) === assignedStartId || Number(seg.endId) === assignedStartId
+    );
 
-    if (endpointsOfFirstSeg.includes(assignedStartId) && endpointsOfLastSeg.includes(assignedEndId)) {
-        currentStation = assignedStartId;
-        targetStation = assignedEndId;
-    } else if (endpointsOfFirstSeg.includes(assignedEndId) && endpointsOfLastSeg.includes(assignedStartId)) {
-        currentStation = assignedEndId;
-        targetStation = assignedStartId;
-    } else {
-        return { isValid: false, error: "The route does not start and end at the assigned stations." };
+    if (startSegIndex === -1) {
+        return { isValid: false, error: "No segment touches the starting station." };
     }
 
-    // 4. Percorri i segmenti uno a uno
-    const visitedSegments = new Set();
+    const startSeg = remainingSegments.splice(startSegIndex, 1)[0];
+    let currentStation = Number(startSeg.startId) === assignedStartId
+        ? Number(startSeg.endId)
+        : Number(startSeg.startId);
 
-    for (let i = 0; i < segments.length; i++) {
-        const segA = Number(segments[i].startId);
-        const segB = Number(segments[i].endId);
+    // Valida il primo segmento
+    if (!stations.get(assignedStartId) || !stations.get(currentStation)) {
+        return { isValid: false, error: "Invalid station ID in starting segment." };
+    }
+    if (!isAdjacentOnAnyLine(stations.get(assignedStartId), currentStation, linesMap)) {
+        return { isValid: false, error: `Stations ${assignedStartId} and ${currentStation} are not adjacent on any line.` };
+    }
 
-        // Il segmento deve toccare la stazione corrente (in qualsiasi verso)
-        // Se la tocca, l'altra estremità è la prossima stazione
-        let nextStation;
-        if (segA === currentStation) nextStation = segB;
-        else if (segB === currentStation) nextStation = segA;
-        else return {
-            isValid: false,
-            error: `Route discontinuity at segment ${i + 1}: expected a segment touching station ${currentStation}.`
-        };
+    // 4. Percorri la catena
+    while (remainingSegments.length > 0) {
+        const nextSegIndex = remainingSegments.findIndex(
+            seg => Number(seg.startId) === currentStation || Number(seg.endId) === currentStation
+        );
 
-        // Le stazioni del segmento devono esistere
-        if (!stations.get(currentStation) || !stations.get(nextStation)) {
-            return { isValid: false, error: `Invalid station ID at segment ${i + 1}.` };
+        if (nextSegIndex === -1) {
+            return { isValid: false, error: `Route is not contiguous: no segment touches station ${currentStation}.` };
         }
 
-        // Le due stazioni devono essere adiacenti in almeno una linea
-        const isAdjacent = isAdjacentOnAnyLine(stations.get(currentStation), nextStation, linesMap);
-        if (!isAdjacent) {
+        const nextSeg = remainingSegments.splice(nextSegIndex, 1)[0];
+        const nextStation = Number(nextSeg.startId) === currentStation
+            ? Number(nextSeg.endId)
+            : Number(nextSeg.startId);
+
+        if (!stations.get(nextStation)) {
+            return { isValid: false, error: `Invalid station ID: ${nextStation}.` };
+        }
+
+        if (!isAdjacentOnAnyLine(stations.get(currentStation), nextStation, linesMap)) {
             return { isValid: false, error: `Stations ${currentStation} and ${nextStation} are not adjacent on any line.` };
         }
 
-        // Lo stesso segmento non può essere percorso due volte (A-B e B-A contano come lo stesso)
-        const segKey = `${Math.min(segA, segB)}-${Math.max(segA, segB)}`;
-        if (visitedSegments.has(segKey)) {
-            return { isValid: false, error: `Segment ${segKey} has already been traversed.` };
-        }
-        visitedSegments.add(segKey);
-
-        // Avanza alla stazione successiva
         currentStation = nextStation;
     }
 
-    // 5. Siamo davvero arrivati alla destinazione?
-    if (currentStation !== targetStation) {
+    if (currentStation !== assignedEndId) {
         return { isValid: false, error: "The route does not end at the assigned destination." };
     }
 
     return { isValid: true, error: null };
 };
 
-// Helper: controlla se 'node' e 'neighborId' sono adiacenti in almeno una linea
 const isAdjacentOnAnyLine = (node, neighborId, linesMap) => {
     for (const lineId of node.line_set) {
         const line = linesMap[lineId];
