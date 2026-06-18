@@ -96,3 +96,18 @@ export const logOut = async () => {
     throw error;
   }
 };
+
+export const getCurrentSession = async () => {
+  try {
+    const response = await fetch(`${APIURL}/sessions/current`, { credentials: 'include' });
+    if (!response.ok) {
+      throw new Error('Not authenticated');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    // Non logghiamo necessariamente l'errore per non intasare la console quando l'utente non è loggato
+    throw error;
+  }
+};
+

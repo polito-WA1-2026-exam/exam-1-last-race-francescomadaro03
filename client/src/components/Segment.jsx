@@ -1,35 +1,28 @@
 import React from 'react';
+import PropagandaPanel from './PropagandaPanel';
 
 const Segment = ({ segment, isSelected, onClick }) => {
   return (
-    <div 
-      className={`card mb-2 shadow-sm ${isSelected ? 'border-primary border-2 bg-light' : 'border-0'}`}
+    <PropagandaPanel 
+      isSelected={isSelected} 
       onClick={() => onClick && onClick(segment)}
-      style={{ cursor: 'pointer', transition: 'all 0.2s' }}
     >
-      <div className="card-body p-3 d-flex align-items-center">
-        {/* Line Color Indicator */}
-        <div 
-          style={{ 
-            width: '12px', 
-            height: '40px', 
-            backgroundColor: segment.color, 
-            borderRadius: '6px',
-            marginRight: '15px'
-          }}
-        ></div>
-        
-        {/* Stations */}
-        <div className="flex-grow-1">
+      <div className="d-flex align-items-center justify-content-center w-100">
+        {/* Stations Only */}
+        <div className="w-100">
           <div className="d-flex justify-content-between align-items-center">
-            <span className="fw-bold">{segment.from}</span>
-            <i className="bi bi-arrow-right text-muted mx-2">➔</i>
-            <span className="fw-bold">{segment.to}</span>
+            <span style={{ color: 'var(--primary)' }}>{segment.from}</span>
+            
+            {/* Flat Triangle Arrow */}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--quinary)" style={{ margin: '0 10px' }}>
+              <polygon points="4,4 20,12 4,20" />
+            </svg>
+            
+            <span style={{ color: 'var(--primary)' }}>{segment.to}</span>
           </div>
-          <small className="text-muted" style={{ fontSize: '0.75rem' }}>Linea: {segment.lineName}</small>
         </div>
       </div>
-    </div>
+    </PropagandaPanel>
   );
 };
 

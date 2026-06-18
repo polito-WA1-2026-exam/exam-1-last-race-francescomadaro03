@@ -1,6 +1,9 @@
 import DystopicMap from './DystopicMap';
 import SegmentHandler from './SegmentHandler';
 import TimerComponent from './TimerComponent';
+import ButtonComponent from './ButtonComponent';
+import InterceptedMessage from './InterceptedMessage';
+import MissionReport from './MissionReport';
 import { getNetwork, setupGame, validateGame } from '../api';
 import { useState, useEffect } from 'react';
 
@@ -86,95 +89,62 @@ const Play = () => {
 
         {/* Schermata dei Risultati */}
         {gameResult ? (
-          <div className="p-4 d-flex flex-column h-100 justify-content-center text-center">
-            {gameResult.isValid ? (
-              <div className="alert alert-success">
-                <h2 className="mb-3">🎉 Vittoria!</h2>
-                <p>Hai raggiunto la destinazione correttamente!</p>
-                <div className="display-4 fw-bold mb-4">{gameResult.finalScore} <i className="bi bi-coin text-warning"></i></div>
-                <h5 className="mb-3 text-start">Eventi del Viaggio:</h5>
-                <ul className="list-group text-start mb-4" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                  {gameResult.events.map((ev, i) => (
-                    <li key={i} className="list-group-item d-flex justify-content-between align-items-center">
-                      <small>{ev.segment}: {ev.message}</small>
-                      <span className={`badge ${ev.scoreChange >= 0 ? 'bg-success' : 'bg-danger'} rounded-pill`}>
-                        {ev.scoreChange > 0 ? '+' : ''}{ev.scoreChange}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : (
-              <div className="alert alert-danger">
-                <h2 className="mb-3">💥 Disastro!</h2>
-                <p>{gameResult.error}</p>
-                <div className="display-4 fw-bold mb-4">0 <i className="bi bi-coin text-warning"></i></div>
-              </div>
-            )}
-            <button
-              className="btn btn-primary btn-lg mt-3"
-              onClick={() => {
-                setGameResult(null);
-                setMission(null);
-                setSelectedSegments([]);
-                setTimeLeft(90);
-              }}
-            >
-              Ritorna alla Mappa
-            </button>
-          </div>
+          <MissionReport 
+            result={gameResult} 
+            onRestart={() => {
+              setGameResult(null);
+              setMission(null);
+              setSelectedSegments([]);
+              setTimeLeft(90);
+            }} 
+          />
         ) : (
           <div className="p-4 d-flex flex-column h-100">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-              <h3 className="m-0">Pannello di Gioco</h3>
-            </div>
-            
             {isPlaying && <TimerComponent timeLeft={timeLeft} maxTime={90} />}
 
-            <div className="flex-grow-1" style={{ minHeight: 0 }}>
+            <div className="flex-grow-1 d-flex flex-column" style={{ minHeight: 0 }}>
               {isPlaying ? (
                 <>
-                  <SegmentHandler
-                    rawData={rawData}
-                    mission={mission}
-                    selectedSegments={selectedSegments}
-                    onSegmentClick={handleSegmentClick}
-                  />
-                  <button
-                    className="btn btn-primary btn-lg w-100 py-3 mt-3 shadow"
-                    onClick={handleSubmission}
-                    style={{ borderRadius: '15px', fontSize: '1.2rem', fontWeight: 'bold' }}
-                  >
-                    Parti! 🚂
-                  </button>
+                  <div className="flex-grow-1" style={{ minHeight: 0, overflow: 'hidden' }}>
+                    <SegmentHandler
+                      rawData={rawData}
+                      mission={mission}
+                      selectedSegments={selectedSegments}
+                      onSegmentClick={handleSegmentClick}
+                    />
+                  </div>
+                  <div className="mt-3 mb-2 d-flex justify-content-center w-100">
+                    <ButtonComponent 
+                      text="TRASMETTI" 
+                      colorVar="--secondary" 
+                      onClick={handleSubmission} 
+                    />
+                  </div>
                 </>
               ) : (
-                <div className="alert alert-warning text-center shadow-sm">
-                  <h5 className="mb-2">Fase di Memorizzazione</h5>
-                  <p className="mb-0 text-muted">Studia bene i percorsi colorati prima di cliccare su Start.</p>
-                </div>
+                <InterceptedMessage text="You have been intercepted. Have a close look at the map, nobody in the Tube will help you nor could be trusted." />
               )}
             </div>
 
             {!isPlaying && (
-              <button
-                className="btn btn-success btn-lg w-100 py-3 mt-3 shadow"
-                onClick={async () => {
-                  try {
-                    const m = await setupGame();
-                    setMission(m);
-                    setSelectedSegments([]); // Reset dei segmenti
-                    setTimeLeft(90); // Reset timer a 90 secondi
-                    setStartTime(Date.now()); // Registra il timestamp di partenza
-                    setIsPlaying(true);
-                  } catch (e) {
-                    alert('Errore caricamento missione');
-                  }
-                }}
-                style={{ borderRadius: '15px', fontSize: '1.2rem', fontWeight: 'bold' }}
-              >
-                🚀 INIZIA A GIOCARE
-              </button>
+              <div className="mt-3 mb-2 d-flex justify-content-center w-100">
+                <ButtonComponent 
+                  text="ESEGUI" 
+                  colorVar="--quinary" 
+                  onClick={async () => {
+                    try {
+                      const m = await setupGame();
+                      setMission(m);
+                      setSelectedSegments([]); // Reset dei segmenti
+                      setTimeLeft(90); // Reset timer a 90 secondi
+                      setStartTime(Date.now()); // Registra il timestamp di partenza
+                      setIsPlaying(true);
+                    } catch (e) {
+                      alert('Errore caricamento missione');
+                    }
+                  }} 
+                />
+              </div>
             )}
           </div>
         )}

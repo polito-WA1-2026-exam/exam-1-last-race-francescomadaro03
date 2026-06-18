@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getLeaderboard } from '../api';
+import MetroScreen from './MetroScreen';
+import ButtonComponent from './ButtonComponent';
+import LondonMapHome from '../assets/LondonMapHome.png';
+import InterceptedMessage from './InterceptedMessage';
+
+const text = "The Agency needs you. Newly intercepted messages must be taken to the headquarters scattered across London. Do not get caught by the enemy agents, and remember: Mind the Gap!"
+
 
 const UserProfile = () => {
   const { username } = useParams();
@@ -22,66 +29,52 @@ const UserProfile = () => {
       });
   }, []);
 
+  const getLeaderboardText = () => {
+    if (loading) return "CARICAMENTO...";
+    if (error) return "ERRORE CONNESSIONE";
+    if (leaderboard.length === 0) return "NESSUN PUNTEGGIO";
+
+    const title = "Best Undercover Agents\n";
+    const entries = leaderboard.map((entry, index) => {
+      const pos = `${index + 1}.`.padEnd(3);
+      const name = `${entry.username}${entry.username === username ? ' *' : ''}`.padEnd(12).substring(0, 12);
+      const score = String(entry.score).padStart(4);
+      return `${pos} ${name} ${score}`;
+    });
+    return title + entries.join('\n');
+  };
+
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4 text-center">Benvenuto, <span className="text-primary">{username}</span>!</h2>
-      
-      <div className="row mt-5">
-        {/* Sinistra: Classifica */}
-        <div className="col-md-7 mb-4">
-          <div className="card shadow-sm">
-            <div className="card-header bg-dark text-white">
-              <h4 className="mb-0">🏆 Best Scores (Leaderboard)</h4>
-            </div>
-            <div className="card-body p-0">
-              {loading ? (
-                <div className="p-4 text-center">Caricamento classifica...</div>
-              ) : error ? (
-                <div className="p-4 text-danger">{error}</div>
-              ) : (
-                <table className="table table-striped table-hover mb-0">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Posizione</th>
-                      <th>Giocatore</th>
-                      <th className="text-end">Punteggio Massimo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {leaderboard.map((entry, index) => (
-                      <tr key={entry.username} className={entry.username === username ? 'table-warning fw-bold' : ''}>
-                        <td>#{index + 1}</td>
-                        <td>{entry.username} {entry.username === username && '(Tu)'}</td>
-                        <td className="text-end">{entry.score}</td>
-                      </tr>
-                    ))}
-                    {leaderboard.length === 0 && (
-                      <tr>
-                        <td colSpan="3" className="text-center">Nessun punteggio registrato.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
+    <div
+      className="container-fluid m-0 p-0 d-flex flex-column align-items-center justify-content-center"
+      style={{
+        minHeight: 'calc(100vh - 80px)',
+        backgroundImage: `url(${LondonMapHome})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        padding: '2rem'
+      }}
+    >
+      <h2 className="mb-4 text-center p-3" style={{ backgroundColor: 'rgba(0,0,0,0.8)', color: 'white', borderRadius: '8px' }}>
+        Benvenuto, <span className="text-var--quinary">{username}</span>!
+      </h2>
+
+      <div className="row w-100 mt-4" style={{ maxWidth: '1200px' }}>
+        {/* Sinistra: Gioca Ancora */}
+        <div className="col-md-6 mb-4 d-flex flex-column align-items-center justify-content-center">
+          <InterceptedMessage text={text}></InterceptedMessage>
+          <ButtonComponent text="Take off" onClick={() => navigate('/play')}></ButtonComponent>
         </div>
 
-        {/* Destra: Gioca Ancora */}
-        <div className="col-md-5 d-flex flex-column align-items-center justify-content-center">
-          <div className="card shadow p-4 text-center border-0 bg-light w-100" style={{ borderRadius: '15px' }}>
-            <h3 className="mb-4">Pronto per un'altra corsa?</h3>
-            <p className="text-muted mb-4">
-              Memorizza la mappa e raggiungi il maggior numero di stazioni prima dello scadere del tempo!
-            </p>
-            <button 
-              className="btn btn-success btn-lg px-5 py-3 fw-bold shadow-sm" 
-              onClick={() => navigate('/play')}
-              style={{ fontSize: '1.5rem', borderRadius: '50px', transition: 'all 0.2s' }}
-            >
-              🚀 PLAY AGAIN
-            </button>
-          </div>
+        {/* Destra: Classifica (Dossier) */}
+        <div className="col-md-6 mb-4 d-flex justify-content-center align-items-center">
+          <MetroScreen
+            text={getLeaderboardText()}
+            width="100%"
+            height="100%"
+            fontSize="24px"
+          />
         </div>
       </div>
     </div>

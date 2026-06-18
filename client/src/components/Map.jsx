@@ -7,7 +7,7 @@ import { getNetwork } from '../api';
 const MapWrapper = () => {
   const { user } = useContext(UserContext);
 
-  if (!user || !user.loggedIn) {
+  if (!user) {
     return (
       <div className="d-flex flex-column align-items-center justify-content-center" style={{ height: '400px' }}>
         <h2>Login to start playing</h2>

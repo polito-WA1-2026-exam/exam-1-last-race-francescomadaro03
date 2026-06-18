@@ -1,9 +1,10 @@
-
+import React from 'react';
 import Segment from './Segment';
+import InterceptedMission from './InterceptedMission';
 
 const SegmentHandler = ({ rawData, mission, selectedSegments = [], onSegmentClick }) => {
-
   const segments = () => {
+    // ... logic remains untouched ...
     if (!rawData || rawData.length === 0) return [];
 
     const lines = {};
@@ -67,22 +68,11 @@ const SegmentHandler = ({ rawData, mission, selectedSegments = [], onSegmentClic
     <div className="d-flex flex-column h-100">
 
       {/* Box della Missione */}
-      {mission && (
-        <div className="card shadow-sm border-0 mb-3 bg-dark text-white">
-          <div className="card-body text-center p-3">
-            <h5 className="mb-2 text-warning">🏁 La tua Missione</h5>
-            <div className="d-flex justify-content-between align-items-center mt-3">
-              <div className="fw-bold fs-5">{mission.start.name}</div>
-              <div className="fs-3 text-muted mx-2">✈️</div>
-              <div className="fw-bold fs-5">{mission.end.name}</div>
-            </div>
-          </div>
-        </div>
-      )}
+      <InterceptedMission mission={mission} />
 
-      {/* Lista dei Segmenti (Scrollabile) */}
-      <h5 className="mb-3 text-muted">Tratte Disponibili:</h5>
-      <div className="flex-grow-1" style={{ overflowY: 'auto', paddingRight: '5px' }}>
+      {/* Lista dei Segmenti */}
+      <style>{`.hide-scroll::-webkit-scrollbar { display: none; }`}</style>
+      <div className="flex-grow-1 hide-scroll" style={{ overflowY: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {segments().map(seg => (
           <Segment
             key={seg.id}

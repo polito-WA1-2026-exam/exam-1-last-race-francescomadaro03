@@ -7,7 +7,7 @@ import Home from './components/Home';
 import Play from './components/Play';
 import NotFound from './components/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
-import { getNetwork } from './api';
+import { getCurrentSession } from './api';
 import './App.css';
 
 // 1. Creiamo e esportiamo il contesto per l'utente loggato
@@ -24,9 +24,10 @@ function App() {
 
   // Al mount dell'app, controlliamo se c'è una sessione attiva chiamando l'API
   useEffect(() => {
-    // Qui andrà la chiamata fetch a GET /api/sessions/current
-    // Per ora togliamo solo il loading
-    setLoading(false);
+    getCurrentSession()
+      .then(user => setUser(user))
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
