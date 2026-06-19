@@ -19,12 +19,10 @@ const Play = () => {
   const [startTime, setStartTime] = useState(null);
   const [gameResult, setGameResult] = useState(null);
 
-  // Ripristinato: scarica i dati crudi in autonomia per non dipendere da TransitMap
   useEffect(() => {
     getNetwork().then(setRawData).catch(console.error);
   }, []);
 
-  // Gestisce il re-rendering della mappa (spegne le linee) quando il gioco inizia
   useEffect(() => {
     if (isPlaying) {
       setShowMapLines(false);
@@ -87,14 +85,14 @@ const Play = () => {
 
         {/* Schermata dei Risultati */}
         {gameResult ? (
-          <MissionReport 
-            result={gameResult} 
+          <MissionReport
+            result={gameResult}
             onRestart={() => {
               setGameResult(null);
               setMission(null);
               setSelectedSegments([]);
               setTimeLeft(90);
-            }} 
+            }}
           />
         ) : (
           <div className="p-4 d-flex flex-column h-100">
@@ -112,10 +110,10 @@ const Play = () => {
                     />
                   </div>
                   <div className="mt-3 mb-2 d-flex justify-content-center w-100">
-                    <ButtonComponent 
-                      text="TRANSMIT" 
-                      colorVar="--secondary" 
-                      onClick={handleSubmission} 
+                    <ButtonComponent
+                      text="TRANSMIT"
+                      colorVar="--secondary"
+                      onClick={handleSubmission}
                     />
                   </div>
                 </>
@@ -126,9 +124,9 @@ const Play = () => {
 
             {!isPlaying && (
               <div className="mt-3 mb-2 d-flex justify-content-center w-100">
-                <ButtonComponent 
-                  text="EXECUTE" 
-                  colorVar="--quinary" 
+                <ButtonComponent
+                  text="EXECUTE"
+                  colorVar="--quinary"
                   onClick={async () => {
                     try {
                       const m = await setupGame();
@@ -140,7 +138,7 @@ const Play = () => {
                     } catch (e) {
                       alert('Error loading mission');
                     }
-                  }} 
+                  }}
                 />
               </div>
             )}

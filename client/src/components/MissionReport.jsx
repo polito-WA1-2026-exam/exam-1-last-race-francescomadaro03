@@ -18,28 +18,27 @@ const MissionReport = ({ result, onRestart }) => {
       contentStyle={{ flexGrow: 1, minHeight: 0 }}
       headerStatus="[ AFTER ACTION REPORT ]"
       headerStatusColor="var(--quinary)"
-      extraOverlay={
-        <div style={{
-          position: 'absolute',
-          top: '25%',
-          right: '5%',
-          color: isSuccess ? 'rgba(45, 74, 30, 0.4)' : 'rgba(166, 79, 60, 0.4)',
-          border: `5px double ${isSuccess ? 'rgba(45, 74, 30, 0.4)' : 'rgba(166, 79, 60, 0.4)'}`,
-          borderRadius: '8px',
-          padding: '10px 15px',
-          transform: 'rotate(-15deg)',
-          fontSize: '2rem',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          lineHeight: 1,
-          pointerEvents: 'none',
-          zIndex: 2,
-          letterSpacing: '4px'
-        }}>
-          {isSuccess ? 'SURVIVED' : 'ARRESTED'}
-        </div>
-      }
     >
+      <div style={{
+        position: 'absolute',
+        top: '25%',
+        right: '5%',
+        color: isSuccess ? 'rgba(45, 74, 30, 0.4)' : 'rgba(166, 79, 60, 0.4)',
+        border: `5px double ${isSuccess ? 'rgba(45, 74, 30, 0.4)' : 'rgba(166, 79, 60, 0.4)'}`,
+        borderRadius: '8px',
+        padding: '10px 15px',
+        transform: 'rotate(-15deg)',
+        fontSize: '2rem',
+        fontWeight: 'bold',
+        textAlign: 'center',
+        lineHeight: 1,
+        pointerEvents: 'none',
+        zIndex: 2,
+        letterSpacing: '4px'
+      }}>
+        {isSuccess ? 'SURVIVED' : 'ARRESTED'}
+      </div>
+
       <div className="text-center my-2">
         <h3 className="fw-bold m-0 text-uppercase" style={{ letterSpacing: '1px' }}>
           {isSuccess ? 'MISSION ACCOMPLISHED' : 'MISSION FAILED'}

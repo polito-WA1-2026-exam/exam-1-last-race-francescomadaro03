@@ -5,7 +5,7 @@ import React from 'react';
  */
 const PropagandaPanel = ({ children, isSelected, onClick, className = '', style = {} }) => {
   return (
-    <div 
+    <button 
       onClick={onClick}
       className={`propaganda-panel ${className}`}
       style={{
@@ -14,7 +14,7 @@ const PropagandaPanel = ({ children, isSelected, onClick, className = '', style 
         border: '6px solid var(--primary)',
         borderRadius: '0px',
         padding: '16px',
-        cursor: onClick ? 'pointer' : 'default',
+        cursor: 'pointer',
         boxShadow: isSelected ? '12px 12px 0px var(--quinary)' : '6px 6px 0px var(--primary)',
         transform: isSelected ? 'translate(-6px, -6px)' : 'none',
         transition: 'all 0.15s ease-out',
@@ -22,6 +22,9 @@ const PropagandaPanel = ({ children, isSelected, onClick, className = '', style 
         textTransform: 'uppercase',
         overflow: 'hidden',
         marginBottom: '1rem',
+        display: 'block',
+        width: '100%',
+        textAlign: 'left',
         ...style
       }}
     >
@@ -37,7 +40,7 @@ const PropagandaPanel = ({ children, isSelected, onClick, className = '', style 
       <div style={{ position: 'relative', zIndex: 1, fontFamily: "'Monoton', var(--heading)", fontWeight: 'normal', fontSize: '1.2rem', letterSpacing: '2px' }}>
         {children}
       </div>
-    </div>
+    </button>
   );
 };
 

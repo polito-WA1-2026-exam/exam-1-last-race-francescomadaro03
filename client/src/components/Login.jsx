@@ -30,11 +30,11 @@ const Login = () => {
   return (
     <div style={{ position: 'relative', width: '100%', height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
 
-      <div style={{ 
-        position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, 
-        backgroundImage: `url(${LondonMapHome})`, 
-        backgroundSize: 'cover', 
-        backgroundPosition: 'center' 
+      <div style={{
+        position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0,
+        backgroundImage: `url(${LondonMapHome})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
       }}></div>
 
       <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1, backgroundColor: 'rgba(0, 0, 0, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -89,7 +89,6 @@ const Login = () => {
               <ButtonComponent
                 text="AUTHENTICATE"
                 colorVar="--secondary"
-                onClick={handleSubmit}
                 type="submit"
               />
             </div>

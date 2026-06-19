@@ -7,8 +7,7 @@ const PaperTemplate = ({
   contentStyle = {},
   headerTitle = 'THE AGENCY',
   headerStatus = '',
-  headerStatusColor = 'var(--quinary, #8b0000)',
-  extraOverlay = null
+  headerStatusColor = 'var(--quinary, #8b0000)'
 }) => {
   return (
     <div
@@ -42,8 +41,6 @@ const PaperTemplate = ({
         )}
         {children}
       </div>
-
-      {extraOverlay}
     </div>
   );
 };
