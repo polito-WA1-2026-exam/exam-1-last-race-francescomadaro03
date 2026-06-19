@@ -31,24 +31,24 @@ const Home = () => {
 
       <div className="mb-4">
         <ButtonComponent
-          text="Dossier della Missione"
+          text="Mission Dossier"
           onClick={() => setShowInstructions(true)}
         />
       </div>
 
       {isLoggedIn ? (
         <div className="text-center mt-4">
-          <h2 className="mb-4" style={{ backgroundColor: 'rgba(0,0,0,0.8)', color: 'var(--quaternary)', padding: '15px', borderRadius: '8px' }}>Bentornato, {user.username}!</h2>
+          <h2 className="mb-4" style={{ backgroundColor: 'rgba(0,0,0,0.8)', color: 'var(--quaternary)', padding: '15px', borderRadius: '8px' }}>Welcome back, Agent {user.username}!</h2>
           <ButtonComponent
-            text="Vai al tuo Profilo"
+            text="Go to Profile"
             onClick={() => navigate(`/user/${user.username}`)}
           />
         </div>
       ) : (
         <div className="text-center mt-4">
-          <p className="lead mb-4 fw-bold" style={{ backgroundColor: 'rgba(0,0,0,0.8)', color: 'white', padding: '15px', borderRadius: '8px' }}>Accedi per testare la tua memoria sulla metropolitana di Londra.</p>
+          <p className="lead mb-4 fw-bold" style={{ backgroundColor: 'rgba(0,0,0,0.8)', color: 'white', padding: '15px', borderRadius: '8px' }}>Sign in to test your memory on the London Underground.</p>
           <ButtonComponent
-            text="Vai al Login"
+            text="Go to Login"
             onClick={() => navigate('/login')}
           />
         </div>

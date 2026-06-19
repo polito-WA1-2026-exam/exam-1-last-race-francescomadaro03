@@ -80,10 +80,10 @@ export default function DystopicMap({ fetchStations, showLines = true }) {
     });
 
     return () => { mounted = false; };
-  }, [fetchStations]);
+  }, []);
 
-  if (loading) return <div>Caricamento mappa distopica...</div>;
-  if (error) return <div className="alert alert-danger">Errore: {error}</div>;
+  if (loading) return <div>Loading dystopic map...</div>;
+  if (error) return <div className="alert alert-danger">Error: {error}</div>;
   if (!network) return null;
 
   return (
@@ -112,7 +112,7 @@ export default function DystopicMap({ fetchStations, showLines = true }) {
           );
         })}
 
-        {/* Draw Stations and Text */}
+
         {network.nodes.map(node => {
           let tx = node.vx;
           let ty = node.vy + (node.id % 2 === 0 ? -(node.r + 8) : (node.r + 20));
@@ -134,10 +134,6 @@ export default function DystopicMap({ fetchStations, showLines = true }) {
                 strokeWidth="3"
                 paintOrder="stroke"
                 strokeLinejoin="round"
-                style={{
-                  pointerEvents: 'none',
-                  userSelect: 'none'
-                }}
               >
                 {node.name}
               </text>

@@ -146,7 +146,7 @@ app.post("/api/games/validate", checkLoggedIn, async (req, res) => {
     // Controllo cheat: Il tempo impiegato non deve superare i 90 secondi (più 5 secondi di tolleranza latenza rete)
     if (startTimestamp && endTimestamp) {
       const elapsedMs = endTimestamp - startTimestamp;
-      if (elapsedMs > 95000) {
+      if (elapsedMs > 93000) {
         // Tempo scaduto, punteggio azzerato
         await saveGame(req.user.username, 0);
         return res.status(400).json({
@@ -177,9 +177,7 @@ app.post("/api/games/validate", checkLoggedIn, async (req, res) => {
     }
 
     const validationResult = validateSubmittedRoute(globalGraph.stations, globalGraph.linesMap, segments, Number(startId), Number(endId));
-    console.log(segments);
-    console.log(validationResult);
-    console.log(validationResult.isValid);
+
 
     // Resettiamo la partita in sessione, sia in caso di vittoria che di sconfitta
     req.session.assignedRoute = null;
@@ -196,41 +194,9 @@ app.post("/api/games/validate", checkLoggedIn, async (req, res) => {
       });
     }
 
-    // Se la route è valida, prendiamo gli eventi dal DB
-    const allEvents = await getEvents();
-
-    // Generiamo gli eventi casuali per ogni segmento (basato sul peso)
-    const segmentEvents = generateRandomEvents(allEvents, segments.length);
-
-    let currentScore = 20; // Si parte con 20 monete
-    const executionSteps = [];
-
-    for (let i = 0; i < segments.length; i++) {
-      const ev = segmentEvents[i];
-      currentScore += ev.bonus;
-
-      // Assicuriamoci che il punteggio finale non sia negativo per via degli eventi sfortunati
-      if (currentScore < 0) currentScore = 0;
-
-      // Recuperiamo i nomi delle stazioni per rendere il messaggio più ricco
-      const startNode = globalGraph.stations.get(segments[i].startId);
-      const endNode = globalGraph.stations.get(segments[i].endId);
-
-      executionSteps.push({
-        step: i + 1,
-        segment: `${startNode.name} -> ${endNode.name}`,
-        message: ev.event_name, // Fix: il DB restituisce 'event_name', non 'name'
-        scoreChange: ev.bonus
-      });
-    }
-
-    // Salviamo il punteggio finale nel database per la classifica
-    await saveGame(req.user.username, currentScore);
-
     return res.json({
       isValid: true,
-      events: executionSteps,
-      finalScore: currentScore
+      numStations: segments.length
     });
 
   } catch (err) {
@@ -243,7 +209,14 @@ app.post("/api/games/validate", checkLoggedIn, async (req, res) => {
 
 app.get("/api/events", checkLoggedIn, async (req, res) => {
   try {
+    const numStations = req.query.numStations;
     const events = await getEvents();
+
+    if (numStations) {
+      const selectedEvents = generateRandomEvents(events, parseInt(numStations));
+      return res.json(selectedEvents);
+    }
+
     return res.json(events);
   } catch (err) {
     console.error(err);

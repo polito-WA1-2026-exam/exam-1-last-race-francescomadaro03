@@ -14,6 +14,20 @@ export const getNetwork = async () => {
   }
 };
 
+export const getEvents = async (numStations) => {
+  try {
+    const url = numStations ? `${APIURL}/events?numStations=${numStations}` : `${APIURL}/events`;
+    const response = await fetch(url, { credentials: 'include' });
+    if (!response.ok) {
+      throw new Error(`Error fetching events: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching events', error);
+    throw error;
+  }
+};
+
 export const logIn = async (username, password) => {
   try {
     const response = await fetch(`${APIURL}/sessions`, {
@@ -48,9 +62,9 @@ export const getLeaderboard = async () => {
 
 export const setupGame = async () => {
   try {
-    const response = await fetch(`${APIURL}/games/setup`, { 
+    const response = await fetch(`${APIURL}/games/setup`, {
       method: 'POST',
-      credentials: 'include' 
+      credentials: 'include'
     });
     if (!response.ok) {
       throw new Error('Failed to setup game');
@@ -70,7 +84,7 @@ export const validateGame = async (segments, startTimestamp, endTimestamp) => {
       body: JSON.stringify({ segments, startTimestamp, endTimestamp }),
       credentials: 'include'
     });
-    
+
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data.error || 'Failed to validate route');
@@ -106,7 +120,6 @@ export const getCurrentSession = async () => {
     const data = await response.json();
     return data;
   } catch (error) {
-    // Non logghiamo necessariamente l'errore per non intasare la console quando l'utente non è loggato
     throw error;
   }
 };

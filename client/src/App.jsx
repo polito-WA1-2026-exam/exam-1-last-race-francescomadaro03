@@ -5,6 +5,8 @@ import UserProfile from './components/UserProfile';
 import Header from './components/Header';
 import Home from './components/Home';
 import Play from './components/Play';
+import Travel from './components/Travel';
+import Result from './components/Result';
 import NotFound from './components/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
 import { getCurrentSession } from './api';
@@ -31,7 +33,7 @@ function App() {
   }, []);
 
   if (loading) {
-    return <div>Caricamento configurazione in corso...</div>;
+    return <div>Loading configuration...</div>;
   }
 
   return (
@@ -50,6 +52,16 @@ function App() {
           <Route path="/play" element={
             <ProtectedRoute>
               <Play />
+            </ProtectedRoute>
+          } />
+          <Route path="/travel" element={
+            <ProtectedRoute>
+              <Travel />
+            </ProtectedRoute>
+          } />
+          <Route path="/result" element={
+            <ProtectedRoute>
+              <Result />
             </ProtectedRoute>
           } />
           <Route path="*" element={<NotFound />} />

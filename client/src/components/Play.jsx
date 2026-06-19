@@ -6,8 +6,10 @@ import InterceptedMessage from './InterceptedMessage';
 import MissionReport from './MissionReport';
 import { getNetwork, setupGame, validateGame } from '../api';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Play = () => {
+  const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
   const [showMapLines, setShowMapLines] = useState(true);
   const [rawData, setRawData] = useState([]);
@@ -53,15 +55,11 @@ const Play = () => {
 
       const endTime = Date.now();
       const res = await validateGame(payload, startTime, endTime);
-      setGameResult(res);
       setIsPlaying(false);
+      navigate('/travel', { state: { numStations: res.numStations } });
     } catch (err) {
-      setGameResult({
-        isValid: false,
-        error: err.message,
-        finalScore: 0
-      });
       setIsPlaying(false);
+      navigate('/result', { state: { isValid: false, error: err.message, finalScore: 0 } });
     }
   };
 
@@ -115,7 +113,7 @@ const Play = () => {
                   </div>
                   <div className="mt-3 mb-2 d-flex justify-content-center w-100">
                     <ButtonComponent 
-                      text="TRASMETTI" 
+                      text="TRANSMIT" 
                       colorVar="--secondary" 
                       onClick={handleSubmission} 
                     />
@@ -129,7 +127,7 @@ const Play = () => {
             {!isPlaying && (
               <div className="mt-3 mb-2 d-flex justify-content-center w-100">
                 <ButtonComponent 
-                  text="ESEGUI" 
+                  text="EXECUTE" 
                   colorVar="--quinary" 
                   onClick={async () => {
                     try {
@@ -140,7 +138,7 @@ const Play = () => {
                       setStartTime(Date.now()); // Registra il timestamp di partenza
                       setIsPlaying(true);
                     } catch (e) {
-                      alert('Errore caricamento missione');
+                      alert('Error loading mission');
                     }
                   }} 
                 />

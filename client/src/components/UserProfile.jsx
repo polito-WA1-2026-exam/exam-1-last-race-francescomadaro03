@@ -24,15 +24,15 @@ const UserProfile = () => {
       })
       .catch(err => {
         console.error(err);
-        setError('Impossibile caricare la classifica.');
+        setError('Failed to load leaderboard.');
         setLoading(false);
       });
   }, []);
 
   const getLeaderboardText = () => {
-    if (loading) return "CARICAMENTO...";
-    if (error) return "ERRORE CONNESSIONE";
-    if (leaderboard.length === 0) return "NESSUN PUNTEGGIO";
+    if (loading) return "LOADING...";
+    if (error) return "CONNECTION ERROR";
+    if (leaderboard.length === 0) return "NO SCORES";
 
     const title = "Best Undercover Agents\n";
     const entries = leaderboard.map((entry, index) => {
@@ -57,7 +57,7 @@ const UserProfile = () => {
       }}
     >
       <h2 className="mb-4 text-center p-3" style={{ backgroundColor: 'rgba(0,0,0,0.8)', color: 'white', borderRadius: '8px' }}>
-        Benvenuto, <span className="text-var--quinary">{username}</span>!
+        Welcome, <span className="text-var--quinary">{username}</span>!
       </h2>
 
       <div className="row w-100 mt-4" style={{ maxWidth: '1200px' }}>

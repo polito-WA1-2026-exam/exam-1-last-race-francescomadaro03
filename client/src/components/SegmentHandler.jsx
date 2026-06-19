@@ -4,7 +4,6 @@ import InterceptedMission from './InterceptedMission';
 
 const SegmentHandler = ({ rawData, mission, selectedSegments = [], onSegmentClick }) => {
   const segments = () => {
-    // ... logic remains untouched ...
     if (!rawData || rawData.length === 0) return [];
 
     const lines = {};
@@ -35,11 +34,9 @@ const SegmentHandler = ({ rawData, mission, selectedSegments = [], onSegmentClic
         extractedSegments.push({
           id: `${line.lineName}-${i}`, // chiave univoca
           fromId: line.stops[i].stationId,
-          toId: line.stops[i+1].stationId,
+          toId: line.stops[i + 1].stationId,
           from: line.stops[i].stationName,
-          to: line.stops[i + 1].stationName,
-          color: line.color,
-          lineName: line.lineName
+          to: line.stops[i + 1].stationName
         });
       }
     });
@@ -58,7 +55,7 @@ const SegmentHandler = ({ rawData, mission, selectedSegments = [], onSegmentClic
       // Se entrambi sono selezionati, mantieni l'ordine in cui sono stati cliccati
       if (aIsSelected && bIsSelected) return aIndex - bIndex;
 
-      return 0; // Se nessuno dei due è selezionato, lascia l'ordine originale
+      return 0;
     });
 
     return extractedSegments;
@@ -82,7 +79,7 @@ const SegmentHandler = ({ rawData, mission, selectedSegments = [], onSegmentClic
           />
         ))}
         {segments().length === 0 && (
-          <div className="text-muted text-center mt-4">Nessun segmento disponibile.</div>
+          <div className="text-muted text-center mt-4">No segment available.</div>
         )}
       </div>
 
