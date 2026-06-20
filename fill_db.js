@@ -232,16 +232,16 @@ db.serialize(() => {
   // Seed Events
   const eventStmt = db.prepare('INSERT INTO events (event_name, bonus, weight) VALUES (?, ?, ?)');
   const eventsData = [
-    { name: 'Mind the gap!', bonus: -1, weight: 8 },
-    { name: 'Severe signal failure', bonus: -4, weight: 1 },
-    { name: 'Found a seat!', bonus: 2, weight: 4 },
-    { name: 'Fast connection', bonus: 1, weight: 5 },
-    { name: 'Strike action', bonus: -3, weight: 2 },
-    { name: 'Ticket inspector - All good', bonus: 0, weight: 7 },
-    { name: 'Pickpocket', bonus: -3, weight: 2 },
-    { name: 'Busker played your favorite song', bonus: 1, weight: 3 },
-    { name: 'Train held at red signal', bonus: -2, weight: 4 },
-    { name: 'Found £10 on the floor', bonus: 4, weight: 1 }
+    { name: 'Agency informant provided a shortcut.', bonus: 3, weight: 4 },
+    { name: 'Intercepted a clear radio frequency. Smooth travel.', bonus: 2, weight: 5 },
+    { name: 'The train doors stayed open just for you.', bonus: 1, weight: 6 },
+    { name: 'Police patrol sweeping carriages. You had to hide.', bonus: -2, weight: 5 },
+    { name: 'Caught without a ticket by transit police! Extensive background check.', bonus: -4, weight: 2 },
+    { name: 'Boarded without paying. Fined and questioned by security.', bonus: -3, weight: 3 },
+    { name: 'Missed the train. Waiting for the next one.', bonus: -2, weight: 6 },
+    { name: 'Severe signal failure on the line.', bonus: -3, weight: 3 },
+    { name: 'Track maintenance slowing down the journey.', bonus: -1, weight: 5 },
+    { name: 'Undercover agents spotted at the platform. Detour required.', bonus: -2, weight: 4 }
   ];
 
   eventsData.forEach((ev) => {

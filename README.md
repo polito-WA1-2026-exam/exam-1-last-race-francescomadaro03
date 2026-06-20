@@ -49,11 +49,16 @@
 
 ## Main React Components
 
-- `ListOfSomething` (in `List.js`): component purpose and main functionality
-- `GreatButton` (in `GreatButton.js`): component purpose and main functionality
-- ...
 
-(only _main_ components, minor ones may be skipped)
+- `Play` in `Play.jsx`: manages the main game interface, including the map, segment selection, and submission timer.
+- `DystopicMap` and `Map` in `DystopicMap.jsx` and `Map.jsx`: handle the visual rendering of the underground network and its stations.
+- `Travel` in `Travel.jsx`: simulates the travel phase by applying random events and calculating the final score.
+- `Result` in `Result.jsx`: displays the final mission report with the game outcome and a button to play again.
+- `SegmentHandler` and `Segment` in `SegmentHandler.jsx` and `Segment.jsx`: allow the user to view and select individual line segments.
+- `ProtectedRoute` in `ProtectedRoute.jsx`: wrapper component that blocks access to private routes for unauthenticated users.
+- `UserProfile` in `UserProfile.jsx`: displays the user's profile details and their historical score leaderboard.
+- `Home` in `Home.jsx`: application landing page containing the introductory mission dossier and the login button.
+- `Login` in `Login.jsx`: handles the authentication form and logic to let the agent access the system.
 
 ## Screenshot
 
@@ -61,9 +66,10 @@
 
 ## Users Credentials
 
-- username, password (plus any other requested info)
-- username, password (plus any other requested info)
+- `john_doe`:`password123`
+- `jane_smith`:`password123`
+- `alice_wonder`:`password123`
+- `bob_builder`:`password123` (this user has no scores)
 
 ## Use of AI Tools
-Briefly describe whether you used any AI tools (e.g., ChatGPT, GitHub Copilot, Claude) while working on this project, for which purposes (e.g., clarifying concepts, debugging, generating code), and how you verified or adapted their output.
-If you did not use any AI tools, simply state so.
+AI was used for debugging purpose and also to have a better understanding on how to manage a better design of the application. It was used to get help in designing UI features, and to adapt some parts of the required algorithms. Every feature was thought by myself, and all code was validated and checked carefully, to meet both correctness and efficiency requirements.
