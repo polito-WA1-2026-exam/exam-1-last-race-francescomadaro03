@@ -38,7 +38,7 @@ const Travel = () => {
         console.error(err);
         navigate('/result', { state: { isValid: false, error: "Error retrieving events", finalScore: 0 } });
       });
-  }, [numStations, navigate]);
+  }, []); //numStations, navigate potrebbero stare nella capture list, ma così sono sicuro che carichi una sola volta
 
   useEffect(() => {
     if (loading || currentEventIndex === -1) return;
@@ -79,11 +79,11 @@ const Travel = () => {
 
   return (
     <div style={{ position: 'relative', width: '100%', height: 'calc(100vh - 80px)', overflow: 'hidden', backgroundColor: 'black' }}>
-      <video 
+      <video
         ref={videoRef}
-        src={travelVideo} 
-        autoPlay 
-        muted 
+        src={travelVideo}
+        autoPlay
+        muted
         onTimeUpdate={(e) => {
           if (e.target.currentTime >= 8) {
             e.target.currentTime = 0;

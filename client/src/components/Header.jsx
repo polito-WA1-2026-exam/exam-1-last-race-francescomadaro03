@@ -5,7 +5,7 @@ import { logOut } from '../api';
 
 const NavText = ({ onClick, to, children }) => {
   const [hover, setHover] = useState(false);
-  
+
   const style = {
     textDecoration: 'none',
     color: hover ? 'var(--quinary)' : 'var(--quaternary)',
@@ -23,8 +23,8 @@ const NavText = ({ onClick, to, children }) => {
 
   if (to) {
     return (
-      <Link 
-        to={to} 
+      <Link
+        to={to}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
         style={style}
@@ -61,16 +61,16 @@ const Header = () => {
   };
 
   return (
-    <header 
-      style={{ 
-        height: '80px', 
+    <header
+      style={{
+        height: '80px',
         backgroundColor: 'var(--primary)',
         color: 'var(--quinary)',
         fontFamily: "'Bitcount Prop Single', var(--sans)",
-        display: 'flex', 
-        alignItems: 'center', 
+        display: 'flex',
+        alignItems: 'center',
         justifyContent: 'space-between',
-        border: '8px solid #111', 
+        border: '8px solid #111',
         borderTop: 'none',
         borderLeft: 'none',
         borderRight: 'none',
@@ -85,12 +85,12 @@ const Header = () => {
     >
       {/* Overlay to simulate the LED grid matrix feel */}
       <div style={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
-          background: 'radial-gradient(circle, rgba(0,0,0,0.4) 1px, transparent 1px)',
-          backgroundSize: '3px 3px',
-          pointerEvents: 'none',
-          zIndex: 0
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        background: 'radial-gradient(circle, rgba(0,0,0,0.4) 1px, transparent 1px)',
+        backgroundSize: '3px 3px',
+        pointerEvents: 'none',
+        zIndex: 0
       }} />
 
       <div style={{ position: 'relative', zIndex: 1 }}>
@@ -98,10 +98,9 @@ const Header = () => {
       </div>
 
       <nav style={{ display: 'flex', gap: '2rem', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-        <NavText to="/home">HOME</NavText>
         {user && <NavText to={`/user/${user.username}`}>PROFILE</NavText>}
         {user && <NavText to="/play">PLAY</NavText>}
-        
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginLeft: '2rem' }}>
           {user ? (
             <>

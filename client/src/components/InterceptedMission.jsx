@@ -6,7 +6,7 @@ const InterceptedMission = ({ mission }) => {
 
   return (
     <PaperTemplate 
-      className="mb-3 p-3 shadow-sm text-center"
+      className="mb-3 p-3 shadow-sm text-center flex-shrink-0"
       headerTitle="THE AGENCY"
       headerStatus="[ MISSION BRIEFING ]"
     >

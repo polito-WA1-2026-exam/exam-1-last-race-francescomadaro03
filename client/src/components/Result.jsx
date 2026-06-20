@@ -8,7 +8,7 @@ const Result = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state || {};
-  
+
   const isValid = state.isValid;
   const events = state.events || [];
   const error = state.error;
@@ -67,7 +67,7 @@ const Result = () => {
         <div className="text-center mt-4">
           <ButtonComponent
             text="CLOSE DOSSIER"
-            onClick={() => navigate('/home')}
+            onClick={() => navigate('/')}
           />
         </div>
       </div>
