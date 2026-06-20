@@ -19,8 +19,15 @@ export const mapCoordinatesInSpace = (lat, lng, innerWidth, innerHeight) => {
 
     const width = maxLng - minLng;
     const height = maxLat - minLat;
+
+    //classical normalization function (val-min) / (max-min) for making variables between 0,1
     const latNorm = (lat - minLat) / height;
     const lngNorm = (lng - minLng) / width;
+
+    //innerwidth/innerheight - 2*padding to make the space for stations in pixel
+    //(1-latNorm) in order to flip the y axis
+
+
     const x = padding + lngNorm * (innerWidth - 2 * padding);
     const y = padding + (1 - latNorm) * (innerHeight - 2 * padding);
 
