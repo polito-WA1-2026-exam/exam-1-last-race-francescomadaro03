@@ -56,8 +56,9 @@ const Header = () => {
     } catch (err) {
       console.error('Logout err', err);
     }
-    setUser(null);
     navigate('/');
+    setTimeout(() => setUser(null), 10); //timeout to avoid navigation problem
+
   };
 
   return (
