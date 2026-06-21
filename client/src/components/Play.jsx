@@ -55,7 +55,7 @@ const Play = () => {
     if (isPlaying && timeLeft === 0) {
       submitMission();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [timeLeft, isPlaying]);
 
   const submitMission = async () => {
