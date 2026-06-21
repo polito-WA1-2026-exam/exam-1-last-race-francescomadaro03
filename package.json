@@ -1,0 +1,20 @@
+{
+  "name": "london-underground-race-root",
+  "version": "1.0.0",
+  "description": "Root package.json for initialization scripts and workspace management",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "postinstall": "npm install --prefix server && npm install --prefix client",
+    "init-db": "node init_db.js && node fill_db.js",
+    "update-network": "node update_network.js && node update_network_coords.js",
+    "start": "npm run dev --prefix server"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.7"
+  }
+}

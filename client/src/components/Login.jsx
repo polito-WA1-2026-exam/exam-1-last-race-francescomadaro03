@@ -28,7 +28,7 @@ const Login = () => {
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
+    <div style={{ position: 'relative', width: '100%', flex: 1, overflow: 'hidden' }}>
 
       <div style={{
         position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0,

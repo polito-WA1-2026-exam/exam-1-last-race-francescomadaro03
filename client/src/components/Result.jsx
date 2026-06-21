@@ -54,7 +54,7 @@ const Result = () => {
     <div
       className="container-fluid m-0 p-0 d-flex flex-column align-items-center justify-content-center"
       style={{
-        height: 'calc(100vh - 80px)',
+        flex: 1,
         minHeight: '600px',
         backgroundImage: `url(${LondonMapHome})`,
         backgroundSize: 'cover',
