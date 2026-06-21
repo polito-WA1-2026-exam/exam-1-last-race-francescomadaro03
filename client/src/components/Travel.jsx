@@ -77,6 +77,14 @@ const Travel = () => {
 
   const currentEvent = events[currentEventIndex];
 
+  let currentScore = 20;
+  if (currentEventIndex >= 0 && currentEventIndex < events.length) {
+    for (let i = 0; i <= currentEventIndex; i++) {
+      currentScore += events[i].bonus;
+      if (currentScore < 0) currentScore = 0;
+    }
+  }
+
   return (
     <div style={{ position: 'relative', width: '100%', height: 'calc(100vh - 80px)', overflow: 'hidden', backgroundColor: 'black' }}>
       <video
@@ -113,6 +121,9 @@ const Travel = () => {
                 <h5 style={{ lineHeight: '1.4' }}>{currentEvent.event_name || currentEvent.message}</h5>
                 <p className="fs-3 mt-4 fw-bold mb-0" style={{ color: currentEvent.bonus >= 0 ? '#1a1a1a' : 'var(--quinary)' }}>
                   {currentEvent.bonus > 0 ? '+' : ''}{currentEvent.bonus} COIN
+                </p>
+                <p className="fs-5 mt-2 fw-bold mb-0 text-dark">
+                  Score: {currentScore}
                 </p>
               </div>
             }

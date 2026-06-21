@@ -12,6 +12,7 @@ const SegmentHandler = ({ rawData, mission, selectedSegments = [], onSegmentClic
     rawData.forEach(row => {
       if (!lines[row.line_id]) {
         lines[row.line_id] = {
+          lineId: row.line_id,
           lineName: row.line_name,
           color: row.color,
           stops: []
@@ -33,6 +34,7 @@ const SegmentHandler = ({ rawData, mission, selectedSegments = [], onSegmentClic
       for (let i = 0; i < line.stops.length - 1; i++) {
         extractedSegments.push({
           id: `${line.lineName}-${i}`, // chiave univoca
+          lineId: line.lineId,
           fromId: line.stops[i].stationId,
           toId: line.stops[i + 1].stationId,
           from: line.stops[i].stationName,

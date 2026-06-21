@@ -61,6 +61,7 @@ const Play = () => {
   const submitMission = async () => {
     try {
       const payload = selectedSegments.map(s => ({
+        lineId: s.lineId,
         startId: s.fromId,
         endId: s.toId
       }));

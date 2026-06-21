@@ -5,7 +5,6 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { getUser, getBestScores, getEvents, getNetwork, saveGame } from "./dao.js"
-import { User, Event, NetworkEntry, Game, } from "./models.js"
 import { buildDoubleLinkedList, generateRoute, validateSubmittedRoute, generateRandomEvents } from "./network-builder.js";
 
 

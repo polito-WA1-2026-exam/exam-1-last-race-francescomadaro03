@@ -211,54 +211,75 @@ export const validateSubmittedRoute = (stations, linesMap, segments, rawAssigned
         return { isValid: false, error: "No route provided." };
     }
 
-    const remainingSegments = [...segments];
+    const firstSeg = segments[0];
+    const firstStartId = Number(firstSeg.startId);
+    const firstEndId = Number(firstSeg.endId);
+    const firstLineId = Number(firstSeg.lineId);
 
-    // 3. Trova il segmento di partenza e rimuovilo
-    const startSegIndex = remainingSegments.findIndex(
-        seg => Number(seg.startId) === assignedStartId || Number(seg.endId) === assignedStartId
-    );
-
-    if (startSegIndex === -1) {
-        return { isValid: false, error: "No segment touches the starting station." };
-    }
-
-    const startSeg = remainingSegments.splice(startSegIndex, 1)[0];
-    let currentStation = Number(startSeg.startId) === assignedStartId
-        ? Number(startSeg.endId)
-        : Number(startSeg.startId);
-
-    // Valida il primo segmento
-    if (!stations.get(assignedStartId) || !stations.get(currentStation)) {
+    if (!stations.get(firstStartId) || !stations.get(firstEndId)) {
         return { isValid: false, error: "Invalid station ID in starting segment." };
     }
-    if (!isAdjacentOnAnyLine(stations.get(assignedStartId), currentStation, linesMap)) {
-        return { isValid: false, error: `Stations ${assignedStartId} and ${currentStation} are not adjacent on any line.` };
+
+    let currentStation;
+
+    if (assignedStartId === firstStartId) {
+        currentStation = firstEndId;
+    } else if (assignedStartId === firstEndId) {
+        currentStation = firstStartId;
+    } else {
+        return { isValid: false, error: "The first segment does not touch the assigned starting station." };
+    }
+
+    const initialNode = stations.get(assignedStartId);
+    if (initialNode.exchange) {
+        if (!initialNode.line_set.has(firstLineId)) {
+            return { isValid: false, error: `Invalid line at interchange ${assignedStartId}.` };
+        }
+        if (!isAdjacentOnSpecificLine(initialNode, currentStation, firstLineId, linesMap)) {
+            return { isValid: false, error: `Stations ${firstStartId} and ${firstEndId} are not adjacent on the selected line.` };
+        }
+    } else {
+        if (!isAdjacentOnAnyLine(initialNode, currentStation, linesMap)) {
+            return { isValid: false, error: `Stations ${firstStartId} and ${firstEndId} are not adjacent on any line.` };
+        }
     }
 
     // 4. Percorri la catena
-    while (remainingSegments.length > 0) {
-        const nextSegIndex = remainingSegments.findIndex(
-            seg => Number(seg.startId) === currentStation || Number(seg.endId) === currentStation
-        );
+    for (let i = 1; i < segments.length; i++) {
+        const seg = segments[i];
+        const segStartId = Number(seg.startId);
+        const segEndId = Number(seg.endId);
+        const segLineId = Number(seg.lineId);
 
-        if (nextSegIndex === -1) {
-            return { isValid: false, error: `Route is not contiguous: no segment touches station ${currentStation}.` };
+        if (!stations.get(segStartId) || !stations.get(segEndId)) {
+            return { isValid: false, error: `Invalid station ID: ${segStartId} or ${segEndId}.` };
         }
 
-        const nextSeg = remainingSegments.splice(nextSegIndex, 1)[0];
-        const nextStation = Number(nextSeg.startId) === currentStation
-            ? Number(nextSeg.endId)
-            : Number(nextSeg.startId);
-
-        if (!stations.get(nextStation)) {
-            return { isValid: false, error: `Invalid station ID: ${nextStation}.` };
+        let nextStationId;
+        if (segStartId === currentStation) {
+            nextStationId = segEndId;
+        } else if (segEndId === currentStation) {
+            nextStationId = segStartId;
+        } else {
+            return { isValid: false, error: `Route is not contiguous: expected segment to connect to ${currentStation}, but got ${segStartId}-${segEndId}.` };
         }
 
-        if (!isAdjacentOnAnyLine(stations.get(currentStation), nextStation, linesMap)) {
-            return { isValid: false, error: `Stations ${currentStation} and ${nextStation} are not adjacent on any line.` };
+        const currentStationNode = stations.get(currentStation);
+
+        if (currentStationNode.exchange) {
+            if (!currentStationNode.line_set.has(segLineId)) {
+                return { isValid: false, error: `Interchange station ${currentStation} does not have the specified line ${segLineId}.` };
+            }
+            if (!isAdjacentOnSpecificLine(currentStationNode, nextStationId, segLineId, linesMap)) {
+                return { isValid: false, error: `Stations are not adjacent on the specified line.` };
+            }
+        } else {
+            if (!isAdjacentOnAnyLine(currentStationNode, nextStationId, linesMap)) {
+                return { isValid: false, error: `Stations are not adjacent on any line.` };
+            }
         }
 
-        currentStation = nextStation;
+        currentStation = nextStationId;
     }
 
     if (currentStation !== assignedEndId) {
@@ -266,6 +287,19 @@ export const validateSubmittedRoute = (stations, linesMap, segments, rawAssigned
     }
 
     return { isValid: true, error: null };
+};
+
+const isAdjacentOnSpecificLine = (node, neighborId, lineId, linesMap) => {
+    const line = linesMap[lineId];
+    if (!line) return false;
+
+    const prev = line.getPrevStop(node.id);
+    const next = line.getNextStop(node.id);
+
+    if ((prev && prev.id === neighborId) || (next && next.id === neighborId)) {
+        return true;
+    }
+    return false;
 };
 
 const isAdjacentOnAnyLine = (node, neighborId, linesMap) => {
@@ -283,12 +317,7 @@ const isAdjacentOnAnyLine = (node, neighborId, linesMap) => {
     return false;
 };
 
-/**
- * Generates an array of random events based on their weights.
- * @param {Array} eventsList - Array of event objects from the DB (must have 'weight' property).
- * @param {number} numSegments - Number of segments for which to generate events.
- * @returns {Array} - Array of selected event objects.
- */
+
 export const generateRandomEvents = (eventsList, numSegments) => {
     if (!eventsList || eventsList.length === 0) return [];
 
