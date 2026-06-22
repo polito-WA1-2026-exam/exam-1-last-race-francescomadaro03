@@ -61,8 +61,14 @@
 - `Login` in `Login.jsx`: handles the authentication form and logic to let the agent access the system.
 
 ## Screenshot
-
-![Screenshot](./img/screenshot.jpg)
+![Home](images/home.png) 
+![Instruction](images/instruction.png) 
+![Login](images/login.png) 
+![Map](images/map.png)
+![Play](images/play.png) 
+![Events](images/travel-event.png)
+![Final log](images/log.png) 
+![Profile](images/profile.png) 
 
 ## Users Credentials
 
