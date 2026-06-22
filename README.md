@@ -1,11 +1,7 @@
 # Exam #1: "The last race"
 ## Student: s355068 MADARO Francesco Maria 
 
-## React Client Application Routes
 
-- Route `/`: page content and purpose
-- Route `/something/:param`: page content and purpose, param specification
-- ...
 
 ## API Server
 
@@ -47,6 +43,18 @@
 - Table `station_line` - contains correspondence between stations and lines, with their stop order to provide better segment checks
 - Table `events` - contains events that are randomically picked to add/subtract user coins
 
+
+## React Client Application Routes
+
+- Route `/`: Home page containing the introductory mission dossier and the login button.
+- Route `/login`: Login page handling the authentication form.
+- Route `/user/:username`: User profile page displaying the user's details and their historical score leaderboard. Requires authentication.
+- Route `/play`: Main game interface with map, segment selection, and submission timer. Requires authentication.
+- Route `/travel`: Travel phase simulation applying random events and calculating the score. Requires authentication.
+- Route `/result`: Final mission report with game outcome and play again button. Requires authentication.
+- Route `*`: Not Found page for invalid paths.
+
+
 ## Main React Components
 
 
@@ -62,7 +70,9 @@
 
 ## Screenshot
 
-![Screenshot](./img/screenshot.jpg)
+![Best scores](images/best.png)
+![Map](images/lines.png)
+![Play](images/no_lines.png)
 
 ## Users Credentials
 
